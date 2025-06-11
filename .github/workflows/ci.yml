@@ -6,11 +6,16 @@ on:
       - main
 permissions:
   contents: read
+  models: read
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: .genaiscript/cache/**
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
       - uses: actions/setup-node@v4
         with:
           cache: npm
@@ -20,17 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./
+      - name: generate missing documentation
+        uses: ./
         with:
+          dry_run: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Commit modified files
-        run: |
-          if [ -z "$(git status --porcelain)" ]; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
-          git add .
-          git diff --staged --quiet || git commit -m "[genai] continuous documentation update"
-          git push
+          github_issue: ${{ github.event.issue.number }}
