@@ -20,7 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./
+      - name: generate missing documentation
+        uses: ./
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Commit modified files
