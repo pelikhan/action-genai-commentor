@@ -2,6 +2,8 @@
 
 This action scans your codebase for functions that are missing documentation or have existing documentation,
 
+The action uses [GenAIScript](https://microsoft.github.io/genaiscript/) and [AST-GREP](https://ast-grep.github.io/).
+
 ## Supported languages:
 
 - TypeScript: `.ts`, `.tsx`, `.mts`, `.cts`
