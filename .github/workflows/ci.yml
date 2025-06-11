@@ -28,6 +28,6 @@ jobs:
       - name: generate missing documentation
         uses: ./
         with:
-          dry-run: true
+          dry_run: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
           github_issue: ${{ github.event.issue.number }}
