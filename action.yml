@@ -1,0 +1,12 @@
+name: action-genai-commentor
+description: action
+inputs:
+  github_token:
+    description: "GitHub token with `models: read` permission at least."
+    required: true
+  debug:
+    description: Enable debug logging.
+    required: false
+runs:
+  using: docker
+  image: Dockerfile
