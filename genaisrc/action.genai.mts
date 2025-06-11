@@ -77,7 +77,7 @@ const stats: {
   edits: number; // edits made
   updated: number; // files updated
   nits?: number; // nits found, only for new docs
-} = [];
+}[] = [];
 
 // process each file serially
 for (const file of files) {
@@ -183,8 +183,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: any) {
       continue;
     }
 
-    const indentation = missingDoc.text().match(/^\s*/)?.[0] || "";
-    const docs = docify(res.text.trim());
+    const docs = docify(res.text.trim(), missingDoc);
 
     // sanity check
     const judge = await classify(
@@ -301,7 +300,7 @@ rule:
 
     if (res.text.includes("/NO/")) continue;
 
-    const docs = docify(res.text.trim());
+    const docs = docify(res.text.trim(), comment);
 
     // ask LLM if change is worth it
     const judge = await classify(
@@ -349,7 +348,10 @@ rule:
   }
 }
 
-function docify(docs: string, indentation: string) {
+function docify(docs: string, node: SgNode) {
+  const indentation = node.text().match(/^\s*/)?.[0] || "";
+  dbg(`indentation: %s`, indentation);
+
   // TODO: use tsdoc package to validate/normalize docs
   docs = parsers.unfence(docs, "*");
   // TODO: sometimes the AI add /** */, removing
@@ -358,6 +360,7 @@ function docify(docs: string, indentation: string) {
     docs = `/**\n* ${docs.split(/\r?\n/g).join("\n* ")}\n*/`;
 
   // normalize indentation
+  dbg({ indentation, docs });
   docs = indentation + docs.replace(/^\r?\n/gm, (m) => m + indentation);
 
   // remove trailing newlines

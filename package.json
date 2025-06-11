@@ -16,7 +16,7 @@
     "typecheck": "genaiscript scripts compile",
     "configure": "genaiscript configure action",
     "test": "echo 'No tests defined.'",
-    "dev": "genaiscript run action --vars dryRun=true",
+    "dev": "DEBUG=script genaiscript run action --vars dryRun=true --vars cache=true",
     "start": "genaiscript run action --github-workspace",
     "release": "sh release.sh"
   }
