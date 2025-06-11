@@ -58,10 +58,10 @@ You should pretify your code before and after running this script to normalize t
 const { output, dbg, vars } = env;
 const cache = true;
 
-dbg({ vars });
+console.error({ vars });
 
 for (const k of Object.keys(process.env).filter((k) => k.startsWith("INPUT_")))
-  dbg(`env: %s=%s`, k, process.env[k]);
+  console.error(`env: %s=%s`, k, process.env[k]);
 
 let { files } = env;
 const {

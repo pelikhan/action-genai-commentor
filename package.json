@@ -1,7 +1,7 @@
 {
   "private": true,
   "version": "0.0.1",
-  "description": "\n## Docs!\n\nThis script generates and updates TypeScript function using an AST/LLM hybrid approach.\nIt uses ast-grep to look for undocumented and documented functions,\nthen uses a combination of LLM, and LLM-as-a-judge to generate and validate the documentation.\n\nYou should pretify your code before and after running this script to normalize the formatting.\n",
+  "description": "A GitHub Action to generate TypeScript comments.",
   "dependencies": {
     "genaiscript": "1.142.4"
   },
