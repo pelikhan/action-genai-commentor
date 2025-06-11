@@ -148,8 +148,8 @@ if (stats.length)
   output.table(
     // filter out rows with no edits or generation
     stats.filter((row) =>
-      Object.values(row).some((d) => typeof d === "number" && d > 0)
-    )
+      Object.values(row).some((d) => typeof d === "number" && d > 0),
+    ),
   );
 
 async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
@@ -170,7 +170,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
         },
       },
     },
-    { applyGitIgnore: false }
+    { applyGitIgnore: false },
   );
   dbg(`found ${missingDocs.length} missing docs`);
 
@@ -194,7 +194,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
                 - Use docstring syntax (https://tsdoc.org/). do not wrap in markdown code section.
     
                 The full source of the file is in ${fileRef} for reference.`.role(
-          "system"
+          "system",
         );
         if (instructions) _.$`${instructions}`.role("system");
       },
@@ -203,7 +203,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
         responseType: "text",
         label: missingDoc.text()?.slice(0, 20) + "...",
         cache,
-      }
+      },
     );
     // if generation is successful, insert the docs
     fileStats.gen += res.usage?.total || 0;
@@ -232,7 +232,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
         flexTokens,
         systemSafety: false,
         system: ["system.technical", "system.typescript"],
-      }
+      },
     );
     fileStats.judge += judge.usage?.total || 0;
     fileStats.judgeCost += judge.usage?.cost || 0;
@@ -275,7 +275,7 @@ rule:
   has:
       kind: "function_declaration"
 `,
-    { applyGitIgnore: false }
+    { applyGitIgnore: false },
   );
   dbg(`found ${matches.length} docs to update`);
   const edits = sg.changeset();
@@ -320,7 +320,7 @@ rule:
         temperature: 0.2,
         systemSafety: false,
         system: ["system.technical", "system.typescript"],
-      }
+      },
     );
     fileStats.gen += res.usage?.total || 0;
     fileStats.genCost += res.usage?.cost || 0;
@@ -353,7 +353,7 @@ rule:
         temperature: 0.2,
         systemSafety: false,
         system: ["system.technical", "system.typescript"],
-      }
+      },
     );
 
     fileStats.judge += judge.usage?.total || 0;
