@@ -27,10 +27,11 @@ jobs:
         with:
           path: .genaiscript/cache
           key: genaiscript-${{ runner.os }}-${{ hashFiles('.genaiscript/cache/**') }}
-      - name: generate missing documentation
+      - name: Generate missing documentation
         uses: ./
         with:
           dry_run: true
+          debug: true
           model: github:openai/gpt-4o
           github_token: ${{ secrets.GITHUB_TOKEN }}
           github_issue: ${{ github.event.pull_request.number }}
