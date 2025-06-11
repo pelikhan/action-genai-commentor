@@ -6,7 +6,7 @@ on:
       - main
 permissions:
   contents: read
-  pull_request: write
+  pull-requests: write
   models: read
 jobs:
   test:
