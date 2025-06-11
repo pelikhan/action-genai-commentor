@@ -18,8 +18,14 @@ You should pretify your code before and after running this script to normalize t
 - `update`: Update existing docs.
 - `max_files`: Maximum number of files to process. (default: `100`)
 - `max_updates`: Maximum number of new or updated comments total. (default: `100`)
+- `flex_tokens`: Maximum number of tokens to build content of requests. (default: `12000`)
 - `github_token`: GitHub token with `models: read` permission at least. (required)
 - `debug`: Enable debug logging.
+
+## Outputs
+
+- `text`: The generated text output.
+- `data`: The generated JSON data output, parsed and stringified.
 
 ## Usage
 

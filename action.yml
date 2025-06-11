@@ -24,12 +24,19 @@ inputs:
     description: Maximum number of new or updated comments total.
     required: false
     default: 100
+  flex_tokens:
+    description: Maximum number of tokens to build content of requests.
+    required: false
+    default: 12000
   github_token:
     description: "GitHub token with `models: read` permission at least."
     required: true
   debug:
     description: Enable debug logging.
     required: false
+branding:
+  color: yellow
+  icon: filter
 runs:
   using: docker
   image: Dockerfile
