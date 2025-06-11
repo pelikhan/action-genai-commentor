@@ -15,6 +15,10 @@ You should pretify your code before and after running this script to normalize t
     icon: "filter",
   },
   parameters: {
+    model: {
+      type: "string",
+      description: "The LLM model to use for generation.",
+    },
     instructions: {
       type: "string",
       description: `Additional prompting instructions for the LLM.`,
@@ -56,6 +60,7 @@ const cache = true;
 
 let { files } = env;
 const {
+  model = "large",
   dryRun,
   missing,
   update,
@@ -197,7 +202,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
         if (instructions) _.$`${instructions}`.role("system");
       },
       {
-        model: "large",
+        model,
         responseType: "text",
         label: missingDoc.text()?.slice(0, 20) + "...",
         cache,
@@ -224,7 +229,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
         err: "The content in <DOCS> does not match with the code in <FUNCTION>.",
       },
       {
-        model: "large",
+        model,
         responseType: "text",
         temperature: 0.2,
         flexTokens,
@@ -311,7 +316,7 @@ rule:
                 `;
       },
       {
-        model: "large",
+        model,
         responseType: "text",
         flexTokens,
         label: match.text()?.slice(0, 20) + "...",
@@ -347,7 +352,7 @@ rule:
         NIT: "The <NEW_DOCS> contains nitpicks (minor adjustments) to <ORIGINAL_DOCS>.",
       },
       {
-        model: "large",
+        model,
         responseType: "text",
         temperature: 0.2,
         systemSafety: false,

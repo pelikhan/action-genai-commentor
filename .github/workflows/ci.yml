@@ -31,5 +31,6 @@ jobs:
         uses: ./
         with:
           dry_run: true
+          model: github:openai/gpt-4o
           github_token: ${{ secrets.GITHUB_TOKEN }}
           github_issue: ${{ github.event.pull_request.number }}
