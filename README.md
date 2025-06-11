@@ -1,9 +1,23 @@
 # action action
 
 
+## Docs!
+
+This script generates and updates TypeScript function using an AST/LLM hybrid approach.
+It uses ast-grep to look for undocumented and documented functions,
+then uses a combination of LLM, and LLM-as-a-judge to generate and validate the documentation.
+
+You should pretify your code before and after running this script to normalize the formatting.
+
 
 ## Inputs
 
+- `instructions`: Additional prompting instructions for the LLM.
+- `dry_run`: If true, the script will not modify files.
+- `missing`: Generate missing docs. (default: `true`)
+- `update`: Update existing docs.
+- `max_files`: Maximum number of files to process. (default: `100`)
+- `max_updates`: Maximum number of new or updated comments total. (default: `100`)
 - `github_token`: GitHub token with `models: read` permission at least. (required)
 - `debug`: Enable debug logging.
 

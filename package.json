@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "version": "0.0.0",
+  "description": "\n## Docs!\n\nThis script generates and updates TypeScript function using an AST/LLM hybrid approach.\nIt uses ast-grep to look for undocumented and documented functions,\nthen uses a combination of LLM, and LLM-as-a-judge to generate and validate the documentation.\n\nYou should pretify your code before and after running this script to normalize the formatting.\n",
+  "dependencies": {
+    "genaiscript": "1.142.4"
+  },
+  "scripts": {
+    "upgrade": "npx -y npm-check-updates -u && npm install",
+    "docker:build": "docker build -t pelikhan-action-genai-commentor .",
+    "docker:start": "docker run -e GITHUB_TOKEN pelikhan-action-genai-commentor",
+    "act:install": "gh extension install https://github.com/nektos/gh-act",
+    "act": "gh act",
+    "lint": "npx --yes prettier --write genaisrc/",
+    "fix": "genaiscript scripts fix",
+    "typecheck": "genaiscript scripts compile",
+    "configure": "genaiscript configure action",
+    "test": "echo 'No tests defined.'",
+    "dev": "genaiscript run action --vars dryRun=true",
+    "start": "genaiscript run action --github-workspace",
+    "release": "sh release.sh"
+  }
+}
