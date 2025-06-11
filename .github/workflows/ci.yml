@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/cache@v4
         with:
-          path: .genaiscript/cache/**
+          path: .genaiscript/cache
           key: genaiscript-${{ runner.os }}-${{ hashFiles('.genaiscript/cache/**') }}
       - name: generate missing documentation
         uses: ./
