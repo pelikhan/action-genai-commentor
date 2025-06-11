@@ -72,6 +72,8 @@ const {
 const applyEdits = !dryRun;
 
 dbg({
+  model,
+  dryRun,
   applyEdits,
   missing,
   update,
@@ -204,6 +206,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
       {
         model,
         responseType: "text",
+        flexTokens,
         label: missingDoc.text()?.slice(0, 20) + "...",
         cache,
       },
