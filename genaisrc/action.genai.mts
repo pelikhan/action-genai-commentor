@@ -46,15 +46,37 @@ You should pretify your code before and after running this script to normalize t
       description: "Maximum number of new or updated comments total.",
       default: 100,
     },
+    flexTokens: {
+      type: "integer",
+      description: "Maximum number of tokens to build content of requests.",
+      default: 12000,
+    },
   },
 });
 const { output, dbg, vars } = env;
+const cache = true;
 
 let { files } = env;
-const { dryRun, missing, update, maxFiles, maxUpdates, instructions } = vars;
+const {
+  dryRun,
+  missing,
+  update,
+  maxFiles,
+  maxUpdates,
+  instructions,
+  flexTokens,
+} = vars;
 const applyEdits = !dryRun;
 
-dbg({ applyEdits, missing, update, maxFiles, maxUpdates, instructions });
+dbg({
+  applyEdits,
+  missing,
+  update,
+  maxFiles,
+  maxUpdates,
+  instructions,
+  flexTokens,
+});
 
 if (!missing && !update) cancel(`not generating or updating docs, exiting...`);
 if (maxFiles && files.length > maxFiles) {
@@ -159,8 +181,10 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
     const res = await runPrompt(
       (_) => {
         // TODO: review what's the best context to provide enough for the LLM to generate docs
-        const fileRef = _.def("FILE", missingDoc.getRoot().root().text()); // TODO: make this optional or insert
-        const functionRef = _.def("FUNCTION", missingDoc.text()); // TODO: expand around function
+        const fileRef = _.def("FILE", missingDoc.getRoot().root().text(), {
+          flex: 1,
+        }); // TODO: make this optional or insert
+        const functionRef = _.def("FUNCTION", missingDoc.text(), { flex: 10 }); // TODO: expand around function
 
         // this needs more eval-ing
         _.$`Generate a TypeScript function documentation for ${functionRef}.
@@ -178,6 +202,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
         model: "large",
         responseType: "text",
         label: missingDoc.text()?.slice(0, 20) + "...",
+        cache,
       }
     );
     // if generation is successful, insert the docs
@@ -204,6 +229,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
         model: "small",
         responseType: "text",
         temperature: 0.2,
+        flexTokens,
         systemSafety: false,
         system: ["system.technical", "system.typescript"],
       }
@@ -288,8 +314,9 @@ rule:
       {
         model: "large",
         responseType: "text",
-        flexTokens: 12000,
+        flexTokens,
         label: match.text()?.slice(0, 20) + "...",
+        cache,
         temperature: 0.2,
         systemSafety: false,
         system: ["system.technical", "system.typescript"],
