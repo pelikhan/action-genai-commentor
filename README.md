@@ -42,14 +42,16 @@ with:
 
 ## Example
 
+In a pull request,
+
 ```yaml
 name: My action
 on:
-    push:
+    pull_request:
 permissions:
     contents: read
     # issues: write
-    # pull-requests: write
+    pull-requests: write
     models: read
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -62,6 +64,7 @@ jobs:
       - uses: pelikhan/action-genai-commentor@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_issue: ${{ github.event.issue.number }}
 ```
 
 ## Development
