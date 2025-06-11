@@ -1,20 +1,15 @@
-# Continuous Documentation GitHub Action with Generative AI
+# Continuous Documentation GitHub Action
 
 This action scans your codebase for functions that are missing documentation or have existing documentation,
 
 The action uses [GenAIScript](https://microsoft.github.io/genaiscript/) and [AST-GREP](https://ast-grep.github.io/).
 
+> [!NOTE]
+> This action uses GitHub Models for LLM inference.
+
 ## Supported languages:
 
 - TypeScript: `.ts`, `.tsx`, `.mts`, `.cts`
-
-## Docs!
-
-This script generates and updates TypeScript function using an AST/LLM hybrid approach.
-It uses ast-grep to look for undocumented and documented functions,
-then uses a combination of LLM, and LLM-as-a-judge to generate and validate the documentation.
-
-You should pretify your code before and after running this script to normalize the formatting.
 
 
 ## Inputs
