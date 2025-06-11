@@ -224,10 +224,11 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
         err: "The content in <DOCS> does not match with the code in <FUNCTION>.",
       },
       {
-        model: "small",
+        model: "large",
         responseType: "text",
         temperature: 0.2,
         flexTokens,
+        cache,
         systemSafety: false,
         system: ["system.technical", "system.typescript"],
       },
@@ -350,6 +351,7 @@ rule:
         responseType: "text",
         temperature: 0.2,
         systemSafety: false,
+        cache,
         system: ["system.technical", "system.typescript"],
       },
     );
