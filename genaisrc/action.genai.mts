@@ -11,8 +11,11 @@ then uses a combination of LLM, and LLM-as-a-judge to generate and validate the 
 
 You should pretify your code before and after running this script to normalize the formatting.
 `,
-  accept: ".ts",
-  files: "test/cowsay.ts",
+  accept: ".ts,.mts,.tsx,.mtsx",
+  branding: {
+    color: "yellow",
+    icon: "filter",
+  },
   parameters: {
     instructions: {
       type: "string",
@@ -66,7 +69,7 @@ if (!files.length) cancel(`no files to process, exiting...`);
 const sg = await host.astGrep();
 
 // collect tokens, generation stats for final report
-const stats: {
+type FileStats = {
   filename: string;
   kind: "new" | "update";
   gen: number; // generation cost
@@ -77,7 +80,8 @@ const stats: {
   edits: number; // edits made
   updated: number; // files updated
   nits?: number; // nits found, only for new docs
-}[] = [];
+};
+const stats: FileStats[] = [];
 
 // process each file serially
 for (const file of files) {
@@ -95,6 +99,7 @@ for (const file of files) {
       refused: 0,
       edits: 0,
       updated: 0,
+      nits: 0,
     });
     await updateDocs(file, stats.at(-1));
   }
@@ -125,7 +130,7 @@ if (stats.length)
     )
   );
 
-async function generateDocs(file: WorkspaceFile, fileStats: any) {
+async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
   const { matches: missingDocs } = await sg.search(
     "ts",
     file.filename,
@@ -211,7 +216,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: any) {
       output.fence(judge.answer);
       continue;
     }
-    const updated = `${docs}\n${missingDoc.text()}`;
+    const updated = `${docs}${missingDoc.text()}`;
     edits.replace(missingDoc, updated);
     fileStats.edits++;
     fileStats.nits++;
@@ -231,7 +236,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: any) {
   }
 }
 
-async function updateDocs(file: WorkspaceFile, fileStats: any) {
+async function updateDocs(file: WorkspaceFile, fileStats: FileStats) {
   const { matches } = await sg.search(
     "ts",
     file.filename,
@@ -349,7 +354,9 @@ rule:
 }
 
 function docify(docs: string, node: SgNode) {
-  const indentation = node.text().match(/^\s*/)?.[0] || "";
+  const range = node.range();
+  dbg(`node range: %o`, range);
+  const indentation = " ".repeat(node.range().start.column);
   dbg(`indentation: %s`, indentation);
 
   // TODO: use tsdoc package to validate/normalize docs
@@ -360,9 +367,8 @@ function docify(docs: string, node: SgNode) {
     docs = `/**\n* ${docs.split(/\r?\n/g).join("\n* ")}\n*/`;
 
   // normalize indentation
-  dbg({ indentation, docs });
-  docs = indentation + docs.replace(/^\r?\n/gm, (m) => m + indentation);
+  docs = docs.replace(/\r?\n/g, (m) => m + indentation);
 
   // remove trailing newlines
-  return docs.replace(/\n+$/, "");
+  return docs.replace(/(\r?\n)+$/, "") + "\n" + indentation;
 }
