@@ -119,6 +119,17 @@ function createDog(
 
 
 
+    /**
+    * / **
+    *  * Generates an ASCII art dog with a thought bubble containing the provided text.
+    *  *
+    *  * @param options Either a DogsayOptions object specifying text, eyes, and tongue, or a string message.
+    *  *   - text: The message to display in the thought bubble.
+    *  *   - eyes: Custom eyes for the dog (optional).
+    *  *   - tongue: Custom tongue for the dog (optional).
+    *  * @returns Combined ASCII art string of the thought bubble and dog.
+    *  * /
+    */
     export function dogthink(options: DogsayOptions | string): string {
         const opts = typeof options === "string" ? { text: options } : options
         return dogsay({ ...opts, mode: "think" })
