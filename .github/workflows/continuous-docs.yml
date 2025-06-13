@@ -1,4 +1,4 @@
-name: Generate Comments
+name: genai-commentor
 on:
   workflow_dispatch:
 permissions:
