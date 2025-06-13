@@ -22,16 +22,25 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      # Cache the generated model requests made by GenAIScript
+      #
+      # A new cache is created for each run to ensure that the latest model requests are used,
+      # but previous caches can be restored and reused if availble.
+      - uses: actions/cache@v4
+        with:
+          path: .genaiscript/cache/**
+          key: genaiscript-${{ github.run_id }}
+          restore-keys: |
+            genaiscript-
       - uses: actions/checkout@v4
       - uses: actions/cache@v4
         with:
           path: .genaiscript/cache
           key: genaiscript-${{ runner.os }}-${{ hashFiles('.genaiscript/cache/**') }}
-      - name: Generate missing documentation
+      - name: Generate comments
         uses: ./
         with:
           dry_run: true
           debug: true
           model: github:openai/gpt-4o
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          github_issue: ${{ github.event.pull_request.number }}

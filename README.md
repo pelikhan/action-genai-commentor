@@ -1,6 +1,8 @@
 # Continuous Documentation GitHub Action
 
-This action scans your codebase for functions that are missing documentation or have existing documentation,
+This action regularly scans your codebase for functions that are missing documentation or have existing documentation.
+
+This action is designed to be run regularly over your codebase, using a scheduled job.
 
 The action uses [GenAIScript](https://microsoft.github.io/genaiscript/) and [AST-GREP](https://ast-grep.github.io/).
 
@@ -11,11 +13,9 @@ The action uses [GenAIScript](https://microsoft.github.io/genaiscript/) and [AST
 
 - TypeScript: `.ts`, `.tsx`, `.mts`, `.cts`
 
-
 ## Inputs
 
 - `github_token`: GitHub token with `models: read` permission at least. (required)
-- `github_issue`: GitHub issue number to comment on. (optional)
 - `instructions`: Additional prompting instructions for the LLM.
 - `dry_run`: If true, the script will not modify files. (default: `false`)
 - `missing`: Generate missing docs. (default: `true`)
@@ -37,12 +37,10 @@ with:
 
 ## Example
 
-In a pull request,
-
 ```yaml
 name: My action
 on:
-    pull_request:
+    schedule:
 permissions:
     contents: read
     # issues: write
@@ -59,7 +57,6 @@ jobs:
       - uses: pelikhan/action-genai-commentor@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          github_issue: ${{ github.event.issue.number }}
 ```
 
 ## Development

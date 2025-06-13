@@ -1,0 +1,42 @@
+name: genai-commentor
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  models: read
+  pull-requests: write
+jobs:
+  generate-comments:
+    runs-on: ubuntu-latest
+    steps:
+      # Cache the generated model requests made by GenAIScript
+      #
+      # A new cache is created for each run to ensure that the latest model requests are used,
+      # but previous caches can be restored and reused if availble.
+      - uses: actions/cache@v4
+        with:
+          path: .genaiscript/cache/**
+          key: genaiscript-${{ github.run_id }}
+          restore-keys: |
+            genaiscript-
+      - uses: actions/checkout@v4
+      - name: generate missing comments
+        uses: ./
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          model: github:openai/gpt-4.1-mini
+      # Show the changes made by the action
+      - name: show changes
+        run: |
+          git diff --color=always || true
+          git diff --cached --color=always || true
+      # Create a pull request with the changes
+      - name: create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'genai-commentor: Update comments'
+          body: 'This pull request updates the comments in the codebase.'
+          branch: genai-commentor/updates
+          commit-message: 'Update comments'
+        
