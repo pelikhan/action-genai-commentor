@@ -2,7 +2,7 @@
 
 This action regularly scans your codebase for functions that are missing documentation or have existing documentation.
 
-This action is designed to be run regularly over your codebase, using a scheduled job.
+This action is designed to be run regularly over your codebase, using a workflow triggered by each sync with the main branch.
 
 The action uses [GenAIScript](https://microsoft.github.io/genaiscript/) and [AST-GREP](https://ast-grep.github.io/).
 
@@ -40,7 +40,10 @@ with:
 ```yaml
 name: My action
 on:
-    schedule:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 permissions:
     contents: read
     # issues: write
