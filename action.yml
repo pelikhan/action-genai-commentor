@@ -21,11 +21,11 @@ inputs:
   max_files:
     description: Maximum number of files to process.
     required: false
-    default: 100
+    default: 1000
   max_updates:
     description: Maximum number of new or updated comments total.
     required: false
-    default: 100
+    default: 50
   flex_tokens:
     description: Maximum number of tokens to build content of requests.
     required: false
