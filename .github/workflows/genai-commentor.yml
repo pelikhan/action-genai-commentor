@@ -26,11 +26,10 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       # Create a pull request with the changes
       - name: create pull request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v7
         with:
-            title: "Update documentation"
-            body: "This pull request contains the latest recommended updates to comments."
-            branch: "genai-commentor/update-comments"
-            base: main
-            token: ${{ secrets.GITHUB_TOKEN }}
-            commit-message: "Auto-generated comments"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'Update comments'
+          body: 'This pull request updates the comments in the codebase.'
+          branch: genai-commentor/updates
+          commit-message: 'Update comments'
