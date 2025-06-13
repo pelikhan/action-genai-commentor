@@ -24,6 +24,7 @@ jobs:
         uses: ./
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          model: openai/gpt-4.1-mini
       # Show the changes made by the action
       - name: show changes
         run: |
