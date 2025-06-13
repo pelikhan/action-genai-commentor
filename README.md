@@ -7,7 +7,7 @@ This action is designed to be run regularly over your codebase, using a schedule
 The action uses [GenAIScript](https://microsoft.github.io/genaiscript/) and [AST-GREP](https://ast-grep.github.io/).
 
 > [!NOTE]
-> This action uses GitHub Models for LLM inference.
+> This action uses GitHub Models for LLM inference. It really assumes you are using [GitHub Models at scale](https://docs.github.com/en/github-models/github-models-at-scale/use-models-at-scale).
 
 ## Supported languages:
 
