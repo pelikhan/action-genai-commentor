@@ -24,6 +24,11 @@ jobs:
         uses: ./
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+      # Show the changes made by the action
+      - name: show changes
+        run: |
+          git diff --color=always || true
+          git diff --cached --color=always || true
       # Create a pull request with the changes
       - name: create pull request
         uses: peter-evans/create-pull-request@v7
