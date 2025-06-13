@@ -1,9 +1,9 @@
 {
   "private": true,
   "version": "0.0.1",
-  "description": "\n## Docs!\n\nThis script generates and updates TypeScript function using an AST/LLM hybrid approach.\nIt uses ast-grep to look for undocumented and documented functions,\nthen uses a combination of LLM, and LLM-as-a-judge to generate and validate the documentation.\n\nYou should pretify your code before and after running this script to normalize the formatting.\n",
+  "description": "A GitHub Action to generate TypeScript comments.",
   "dependencies": {
-    "genaiscript": "1.142.4"
+    "genaiscript": "1.142.5"
   },
   "scripts": {
     "upgrade": "npx -y npm-check-updates -u && npm install",
@@ -16,8 +16,8 @@
     "typecheck": "genaiscript scripts compile",
     "configure": "genaiscript configure action",
     "test": "echo 'No tests defined.'",
-    "dev": "DEBUG=script genaiscript run action test/cowsay.ts --vars dryRun=true",
-    "start": "genaiscript run action --github-workspace --no-run-trace --pull-request-comment",
+    "dev": "DEBUG=script* genaiscript run action test/cowsay.ts --vars dryRun=true",
+    "start": "DEBUG=* genaiscript run action --github-workspace --no-run-trace --no-output-trace --pull-request-comment",
     "release": "sh release.sh"
   }
 }

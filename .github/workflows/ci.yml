@@ -6,28 +6,32 @@ on:
       - main
 permissions:
   contents: read
+  pull-requests: write
   models: read
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: .genaiscript/cache/**
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
       - uses: actions/setup-node@v4
         with:
           cache: npm
       - run: npm ci
       - run: npm test
   test-action:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: generate missing documentation
+      - uses: actions/cache@v4
+        with:
+          path: .genaiscript/cache
+          key: genaiscript-${{ runner.os }}-${{ hashFiles('.genaiscript/cache/**') }}
+      - name: Generate missing documentation
         uses: ./
         with:
           dry_run: true
+          debug: true
+          model: github:openai/gpt-4o
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          github_issue: ${{ github.event.issue.number }}
+          github_issue: ${{ github.event.pull_request.number }}

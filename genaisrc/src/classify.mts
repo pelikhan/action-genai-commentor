@@ -1,3 +1,5 @@
+const dbg = host.logger("script:classify")
+
 /**
  * Options for classifying data using AI models.
  *
@@ -62,6 +64,7 @@ export async function classify<L extends Record<string, string>>(
   const allChoices = Array.from(new Set(choices));
   const ctx = options?.ctx || env.generator;
 
+  dbg(`options: %O`, rest)
   const res = await ctx.runPrompt(
     async (_) => {
       _.$`## Expert Classifier
