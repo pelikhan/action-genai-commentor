@@ -5,6 +5,16 @@ export interface DogsayOptions {
     tongue?: string
 }
 
+/**
+ * Generates an ASCII art dog with a speech or thought bubble containing the provided text.
+ *
+ * @param options Either a DogsayOptions object specifying text, mode, eyes, and tongue, or a string to be displayed in the bubble.
+ *   - text: The message to display.
+ *   - mode: Whether to "say" (default) or "think" the message.
+ *   - eyes: Custom eyes for the dog (default "oo").
+ *   - tongue: Custom tongue (default is two spaces).
+ * @returns Combined ASCII art string of the speech bubble and dog.
+ */
 export function dogsay(options: DogsayOptions | string): string {
     // Handle string argument
     const opts: DogsayOptions =
@@ -26,6 +36,13 @@ export function dogsay(options: DogsayOptions | string): string {
     return bubble + dog
 }
 
+/**
+ * Splits the input text into lines that do not exceed the specified maximum width.
+ *
+ * @param text The string to be wrapped into lines.
+ * @param maxWidth The maximum width of each line. Defaults to 40 if not provided.
+ * @returns An array of strings, each representing a line within the given width.
+ */
 export function formatText(text: string, maxWidth: number = 40): string[] {
     if (!text) return [""]
 

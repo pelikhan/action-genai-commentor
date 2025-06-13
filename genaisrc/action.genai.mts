@@ -75,7 +75,8 @@ const {
   instructions,
   flexTokens,
 } = vars;
-const applyEdits = !dryRun;
+//const applyEdits = !dryRun;
+const applyEdits = !dryRun || dryRun == "false";  // workaround for GenAIScript bug
 
 dbg({
   model,
