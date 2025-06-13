@@ -9,6 +9,8 @@ The action uses [GenAIScript](https://microsoft.github.io/genaiscript/) and [AST
 > [!NOTE]
 > This action uses GitHub Models for LLM inference. It really assumes you are using [GitHub Models at scale](https://docs.github.com/en/github-models/github-models-at-scale/use-models-at-scale).
 
+You must set "Allow GitHub Actions to create and approve pull requests" in your repository settings to allow the action to create pull requests with documentation updates.
+
 ## Supported languages:
 
 - TypeScript: `.ts`, `.tsx`, `.mts`, `.cts`
