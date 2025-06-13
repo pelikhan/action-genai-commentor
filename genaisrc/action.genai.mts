@@ -9,7 +9,8 @@ then uses a combination of LLM, and LLM-as-a-judge to generate and validate the 
 You should pretify your code before and after running this script to normalize the formatting.
 `,
   accept: ".ts,.mts,.tsx,.mtsx,.cts",
-  files: ["**/*.ts", "**/*.mts", "**/*.tsx", "**/*.mtsx", "**/*.cts"],
+  files: ["test/**/*.ts"],
+  //files: ["**/*.ts", "**/*.mts", "**/*.tsx", "**/*.mtsx", "**/*.cts"],
   branding: {
     color: "yellow",
     icon: "filter",
@@ -288,9 +289,10 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats, shouldSto
   fileStats.updated = 1;
   if (applyEdits) {
     await workspace.writeFiles(modifiedFiles);
-  } else {
-    output.diff(file, modifiedFiles[0]);
-  }
+  } 
+  output.diff(file, modifiedFiles[0]);
+  dbg(`updated ${file.filename} with ${modifiedFiles.length} edits`);
+  
 }
 
 async function updateDocs(file: WorkspaceFile, fileStats: FileStats, shouldStop: () => boolean, onUpdate: () => void) {
