@@ -6,6 +6,7 @@ on:
       - main
 permissions:
   contents: read
+  pull-requests: write
   models: read
 jobs:
   test:
@@ -18,6 +19,7 @@ jobs:
       - run: npm ci
       - run: npm test
   test-action:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       # Cache the generated model requests made by GenAIScript
@@ -31,8 +33,14 @@ jobs:
           restore-keys: |
             genaiscript-
       - uses: actions/checkout@v4
-      - name: generate missing documentation
+      - uses: actions/cache@v4
+        with:
+          path: .genaiscript/cache
+          key: genaiscript-${{ runner.os }}-${{ hashFiles('.genaiscript/cache/**') }}
+      - name: Generate comments
         uses: ./
         with:
           dry_run: true
+          debug: true
+          model: github:openai/gpt-4o
           github_token: ${{ secrets.GITHUB_TOKEN }}

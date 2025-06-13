@@ -1,6 +1,8 @@
 name: action-genai-commentor
 description: Generate TypeScript function documentation using AST insertion
 inputs:
+  model:
+    description: The model to use for generating comments.
   instructions:
     description: Additional prompting instructions for the LLM.
     required: false

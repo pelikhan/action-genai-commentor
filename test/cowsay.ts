@@ -86,9 +86,7 @@ function createBubble(lines: string[], mode: "say" | "think"): string {
     return result
 }
 
-/**
- * Create the ASCII cow
- */
+  // Create the ASCII cow
 function createCow(
     eyes: string,
     tongue: string,
