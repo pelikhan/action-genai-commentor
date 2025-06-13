@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A GitHub Action to generate TypeScript comments.",
   "dependencies": {
-    "genaiscript": "1.142.5"
+    "genaiscript": "1.142.9"
   },
   "scripts": {
     "upgrade": "npx -y npm-check-updates -u && npm install",
