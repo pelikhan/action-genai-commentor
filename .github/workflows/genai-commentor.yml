@@ -35,7 +35,8 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          title: 'Update comments'
+          title: 'genai-commentor: Update comments'
           body: 'This pull request updates the comments in the codebase.'
           branch: genai-commentor/updates
           commit-message: 'Update comments'
+        
