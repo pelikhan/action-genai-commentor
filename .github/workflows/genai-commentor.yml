@@ -2,7 +2,7 @@ name: genai-commentor
 on:
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   models: read
   pull-requests: write
 jobs:
