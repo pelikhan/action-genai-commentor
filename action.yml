@@ -31,9 +31,6 @@ inputs:
   github_token:
     description: "GitHub token with `models: read` permission at least."
     required: true
-  github_issue:
-    description: "GitHub issue or pull request number to comment on."
-    required: false
   debug:
     description: Enable debug logging.
     required: false

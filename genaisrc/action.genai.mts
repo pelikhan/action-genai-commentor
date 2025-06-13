@@ -104,7 +104,12 @@ type FileStats = {
 const stats: FileStats[] = [];
 
 // process each file serially
+let totalUpdates = 0; // Track total new or updated comments
 for (const file of files) {
+  if (totalUpdates >= maxUpdates) {
+    dbg(`Reached maxUpdates (${maxUpdates}), stopping.`);
+    break;
+  }
   console.debug(file.filename);
 
   // generate updated docs
@@ -121,7 +126,7 @@ for (const file of files) {
       updated: 0,
       nits: 0,
     });
-    await updateDocs(file, stats.at(-1));
+    await updateDocs(file, stats.at(-1), () => totalUpdates >= maxUpdates, () => totalUpdates++);
   }
 
   // generate missing docs
@@ -138,7 +143,7 @@ for (const file of files) {
       updated: 0,
       nits: 0,
     });
-    await generateDocs(file, stats.at(-1));
+    await generateDocs(file, stats.at(-1), () => totalUpdates >= maxUpdates, () => totalUpdates++);
   }
 }
 
@@ -150,7 +155,7 @@ if (stats.length)
     ),
   );
 
-async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
+async function generateDocs(file: WorkspaceFile, fileStats: FileStats, shouldStop: () => boolean, onUpdate: () => void) {
   const { matches: missingDocs } = await sg.search(
     "ts",
     file.filename,
@@ -176,6 +181,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
   const edits = sg.changeset();
   // for each match, generate a docstring for functions not documented
   for (const missingDoc of missingDocs) {
+    if (shouldStop()) break;
     const res = await runPrompt(
       (_) => {
         // TODO: review what's the best context to provide enough for the LLM to generate docs
@@ -244,6 +250,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
     edits.replace(missingDoc, updated);
     fileStats.edits++;
     fileStats.nits++;
+    onUpdate();
   }
 
   // apply all edits and write to the file
@@ -260,7 +267,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats) {
   }
 }
 
-async function updateDocs(file: WorkspaceFile, fileStats: FileStats) {
+async function updateDocs(file: WorkspaceFile, fileStats: FileStats, shouldStop: () => boolean, onUpdate: () => void) {
   const { matches } = await sg.search(
     "ts",
     file.filename,
@@ -279,6 +286,7 @@ rule:
   const edits = sg.changeset();
   // for each match, generate a docstring for functions not documented
   for (const match of matches) {
+    if (shouldStop()) break;
     const comment = match.prev();
 
     const res = await runPrompt(
@@ -362,6 +370,7 @@ rule:
     }
     edits.replace(comment, docs);
     fileStats.edits++;
+    onUpdate();
   }
 
   // apply all edits and write to the file
