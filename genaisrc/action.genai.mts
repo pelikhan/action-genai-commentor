@@ -59,11 +59,6 @@ You should pretify your code before and after running this script to normalize t
 const { output, dbg, vars } = env;
 const cache = true;
 
-console.error({ vars });
-
-for (const k of Object.keys(process.env).filter((k) => k.startsWith("INPUT_")))
-  console.error(`env: %s=%s`, k, process.env[k]);
-
 let { files } = env;
 const {
   model = "large",
@@ -112,7 +107,6 @@ type FileStats = {
   refused: number; // refused generation
   edits: number; // edits made
   updated: number; // files updated
-  nits?: number; // nits found, only for new docs
 };
 const stats: FileStats[] = [];
 
@@ -120,7 +114,7 @@ const stats: FileStats[] = [];
 let totalUpdates = 0; // Track total new or updated comments
 for (const file of files) {
   if (totalUpdates >= maxUpdates) {
-    dbg(`Reached maxUpdates (${maxUpdates}), stopping.`);
+    dbg(`reached max updates, stopping.`);
     break;
   }
   console.debug(file.filename);
@@ -137,9 +131,13 @@ for (const file of files) {
       refused: 0,
       edits: 0,
       updated: 0,
-      nits: 0,
     });
-    await updateDocs(file, stats.at(-1), () => totalUpdates >= maxUpdates, () => totalUpdates++);
+    await updateDocs(
+      file,
+      stats.at(-1),
+      () => totalUpdates >= maxUpdates,
+      () => totalUpdates++,
+    );
   }
 
   // generate missing docs
@@ -154,33 +152,42 @@ for (const file of files) {
       refused: 0,
       edits: 0,
       updated: 0,
-      nits: 0,
     });
-    await generateDocs(file, stats.at(-1), () => totalUpdates >= maxUpdates, () => totalUpdates++);
+    await generateDocs(
+      file,
+      stats.at(-1),
+      () => totalUpdates >= maxUpdates,
+      () => totalUpdates++,
+    );
   }
 }
 
 if (stats.length)
   output.table(
     // filter out rows with no edits or generation
-    stats.filter((row) =>
-      Object.values(row).some((d) => typeof d === "number" && d > 0)
-    )
-    // Format the numbers
-    .map((row) => ({
-      ...row,
-      gen: row.gen.toFixed(2),
-      genCost: row.genCost.toFixed(2),
-      judge: row.judge.toFixed(2),
-      judgeCost: row.judgeCost.toFixed(2),
-      edits: row.edits.toFixed(0),
-      updated: row.updated.toFixed(0),
-      refused: row.refused.toFixed(0),
-      nits: row.nits?.toFixed(0) || "N/A",
-    }))
+    stats
+      .filter((row) =>
+        Object.values(row).some((d) => typeof d === "number" && d > 0),
+      )
+      // Format the numbers
+      .map((row) => ({
+        ...row,
+        gen: row.gen.toFixed(2),
+        genCost: row.genCost.toFixed(2),
+        judge: row.judge.toFixed(2),
+        judgeCost: row.judgeCost.toFixed(2),
+        edits: row.edits.toFixed(0),
+        updated: row.updated.toFixed(0),
+        refused: row.refused.toFixed(0),
+      })),
   );
 
-async function generateDocs(file: WorkspaceFile, fileStats: FileStats, shouldStop: () => boolean, onUpdate: () => void) {
+async function generateDocs(
+  file: WorkspaceFile,
+  fileStats: FileStats,
+  shouldStop: () => boolean,
+  onUpdate: () => void,
+) {
   const { matches: missingDocs } = await sg.search(
     "ts",
     file.filename,
@@ -198,7 +205,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats, shouldSto
         },
       },
     },
-    { applyGitIgnore: false }
+    { applyGitIgnore: false },
   );
   dbg(`found ${missingDocs.length} missing docs`);
 
@@ -223,7 +230,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats, shouldSto
                 - Use docstring syntax (https://tsdoc.org/). do not wrap in markdown code section.
     
                 The full source of the file is in ${fileRef} for reference.`.role(
-          "system"
+          "system",
         );
         if (instructions) _.$`${instructions}`.role("system");
       },
@@ -233,7 +240,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats, shouldSto
         flexTokens,
         label: missingDoc.text()?.slice(0, 20) + "...",
         cache,
-      }
+      },
     );
     // if generation is successful, insert the docs
     fileStats.gen += res.usage?.total || 0;
@@ -263,7 +270,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats, shouldSto
         cache,
         systemSafety: false,
         system: ["system.technical", "system.typescript"],
-      }
+      },
     );
     fileStats.judge += judge.usage?.total || 0;
     fileStats.judgeCost += judge.usage?.cost || 0;
@@ -276,7 +283,6 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats, shouldSto
     const updated = `${docs}${missingDoc.text()}`;
     edits.replace(missingDoc, updated);
     fileStats.edits++;
-    fileStats.nits++;
     onUpdate();
   }
 
@@ -289,13 +295,17 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats, shouldSto
   fileStats.updated = 1;
   if (applyEdits) {
     await workspace.writeFiles(modifiedFiles);
-  } 
+  }
   output.diff(file, modifiedFiles[0]);
   dbg(`updated ${file.filename} with ${modifiedFiles.length} edits`);
-  
 }
 
-async function updateDocs(file: WorkspaceFile, fileStats: FileStats, shouldStop: () => boolean, onUpdate: () => void) {
+async function updateDocs(
+  file: WorkspaceFile,
+  fileStats: FileStats,
+  shouldStop: () => boolean,
+  onUpdate: () => void,
+) {
   const { matches } = await sg.search(
     "ts",
     file.filename,
@@ -308,15 +318,15 @@ rule:
   has:
       kind: "function_declaration"
 `,
-    { applyGitIgnore: false }
+    { applyGitIgnore: false },
   );
   dbg(`found ${matches.length} docs to update`);
   const edits = sg.changeset();
+  const pendingCacheUpdates: { body: string; comment: string }[] = [];
   // for each match, generate a docstring for functions not documented
   for (const match of matches) {
     if (shouldStop()) break;
     const comment = match.prev();
-
     const res = await runPrompt(
       (_) => {
         _.def("FILE", match.getRoot().root().text(), { flex: 1 });
@@ -324,26 +334,26 @@ rule:
         _.def("FUNCTION", match.text(), { flex: 10 });
         // this needs more eval-ing
         _.$`Update the TypeScript docstring <DOCSTRING> to match the code in function <FUNCTION>.
-                - If the docstring is up to date, return /NO/. It's ok to leave it as is.
-                - do not rephrase an existing sentence if it is correct.
-                - Make sure parameters are documented.
-                - do NOT include types, this is for TypeScript.
-                - Use docstring syntax. do not wrap in markdown code section.
-                - Minimize updates to the existing docstring.
-                
-                The full source of the file is in <FILE> for reference.
-                The source of the function is in <FUNCTION>.
-                The current docstring is <DOCSTRING>.
+- If the docstring is up to date, return /NO/. It's ok to leave it as is.
+- do not rephrase an existing sentence if it is correct.
+- Make sure parameters are documented.
+- do NOT include types, this is for TypeScript.
+- Use docstring syntax. do not wrap in markdown code section.
+- Minimize updates to the existing docstring.
 
-                docstring:
+The full source of the file is in <FILE> for reference.
+The source of the function is in <FUNCTION>.
+The current docstring is <DOCSTRING>.
 
-                /**
-                 * description
-                 * @param param1 - description
-                 * @param param2 - description
-                 * @returns description
-                 */
-                `;
+docstring:
+
+/**
+ * description
+ * @param param1 - description
+ * @param param2 - description
+ * @returns description
+ */
+`;
       },
       {
         model,
@@ -354,7 +364,7 @@ rule:
         temperature: 0.2,
         systemSafety: false,
         system: ["system.technical", "system.typescript"],
-      }
+      },
     );
     fileStats.gen += res.usage?.total || 0;
     fileStats.genCost += res.usage?.cost || 0;
@@ -364,10 +374,12 @@ rule:
       continue;
     }
 
-    if (res.text.includes("/NO/")) continue;
+    if (res.text.includes("/NO/")) {
+      dbg(`llm says docs are up to date, skipping`);
+      continue;
+    }
 
     const docs = docify(res.text.trim(), comment);
-
     // ask LLM if change is worth it
     const judge = await classify(
       (_) => {
@@ -388,7 +400,7 @@ rule:
         systemSafety: false,
         cache,
         system: ["system.technical", "system.typescript"],
-      }
+      },
     );
 
     fileStats.judge += judge.usage?.total || 0;
