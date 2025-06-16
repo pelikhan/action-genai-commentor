@@ -9,8 +9,7 @@ then uses a combination of LLM, and LLM-as-a-judge to generate and validate the 
 You should pretify your code before and after running this script to normalize the formatting.
 `,
   accept: ".ts,.mts,.tsx,.mtsx,.cts",
-  files: ["test/**/*.ts"],
-  //files: ["**/*.ts", "**/*.mts", "**/*.tsx", "**/*.mtsx", "**/*.cts"],
+  files: ["src/**/*.ts", "src/**/*.mts", "src/**/*.tsx", "src/**/*.mtsx", "src/**/*.cts"],
   branding: {
     color: "yellow",
     icon: "filter",

@@ -43,5 +43,6 @@ jobs:
           dry_run: true
           debug: true
           max_edits: 2
+          files: test/**/*.ts
           model: github:openai/gpt-4.1-mini
           github_token: ${{ secrets.GITHUB_TOKEN }}
