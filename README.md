@@ -18,13 +18,17 @@ You must set "Allow GitHub Actions to create and approve pull requests" in your 
 ## Inputs
 
 - `github_token`: GitHub token with `models: read` permission at least. (required)
+- `model`: The model to use for generating documentation. (default: `github:openai/gpt-4.1-mini`)
+- `files`: The files to process, in glob format. (default: `**/src/**/*.{ts,tsx,mts,cts}`)
+- `kinds`: Comma-separated list of kinds of entities to process: interface,class,function,enum,typeAlias,property,method,variable. (default: all but variable)
+- `exports_only`: If true, only process exported entities. (default: `false`)
+- `update_existing`: Update existing docs (increases cost). (default: `false`)
 - `instructions`: Additional prompting instructions for the LLM.
+- `max_context`: Maximum number of tokens to build content of requests. (default: `12000`)
+- `max_edits`: Maximum number of new or updated comments total. (default: `50`)
+- `judge`: If true, the script will judge the quality of generated comments. (default: `false`)
 - `dry_run`: If true, the script will not modify files. (default: `false`)
-- `missing`: Generate missing docs. (default: `true`)
-- `update`: Update existing docs. (default: `false`)
-- `max_files`: Maximum number of files to process. (default: `100`)
-- `max_updates`: Maximum number of new or updated comments total. (default: `100`)
-- `flex_tokens`: Maximum number of tokens to build content of requests. (default: `12000`)
+- `mock`: If true, the script will insert a mock comment instead of actual documentation. (default: `false`)
 - `debug`: Enable debug logging.
 
 ## Usage
@@ -35,12 +39,13 @@ Add the following to your step in your workflow file:
 uses: pelikhan/action-genai-commentor@main
 with:
   github_token: ${{ secrets.GITHUB_TOKEN }}
+  files: '**/src/**/*.{ts,tsx,mts,cts}'
 ```
 
 ## Example
 
 ```yaml
-name: My action
+name: Improve Code Comments
 on:
   push:
     branches:
@@ -48,7 +53,6 @@ on:
   workflow_dispatch:
 permissions:
     contents: read
-    # issues: write
     pull-requests: write
     models: read
 concurrency:
@@ -59,9 +63,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Cache the generated model requests made by GenAIScript
+      #
+      # A new cache is created for each run to ensure that the latest model requests are used,
+      # but previous caches can be restored and reused if availble.
+      - uses: actions/cache@v4
+        with:
+          path: .genaiscript/cache/**
+          key: genaiscript-${{ github.run_id }}
+          restore-keys: genaiscript-
+
+      # Generate or update comments in the codebase
       - uses: pelikhan/action-genai-commentor@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          update_existing: true
+          max_edits: 10
 ```
 
 ## Development

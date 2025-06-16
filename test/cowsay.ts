@@ -1,4 +1,4 @@
-interface CowsayOptions {
+export interface CowsayOptions {
     text: string
     mode?: "say" | "think"
     eyes?: string
