@@ -31,7 +31,7 @@ inputs:
     description: Maximum number of files to process.
     required: false
     default: 10000
-  max_updates:
+  max_edits:
     description: Maximum number of new or updated comments total.
     required: false
     default: 50

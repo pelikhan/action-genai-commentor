@@ -49,12 +49,7 @@ You should pretify your code before and after running this script to normalize t
       default: false,
       description: "Update existing docs.",
     },
-    maxFiles: {
-      type: "integer",
-      description: "Maximum number of files to process.",
-      default: 10000,
-    },
-    maxUpdates: {
+    maxEdits: {
       type: "integer",
       description: "Maximum number of new or updated comments total.",
       default: 50,
@@ -97,8 +92,7 @@ const {
   mock,
   missing = true,
   updateExisting,
-  maxFiles,
-  maxUpdates,
+  maxEdits,
   instructions,
   flexTokens,
   kinds,
@@ -114,8 +108,7 @@ dbg({
   applyEdits,
   missing,
   updateExisting,
-  maxFiles,
-  maxUpdates,
+  maxEdits,
   instructions,
   flexTokens,
   kinds,
@@ -124,12 +117,6 @@ dbg({
 });
 
 if (!missing && !updateExisting) cancel(`not generating or updating docs, exiting...`);
-if (maxFiles && files.length > maxFiles) {
-  dbg(`random slicing files to ${maxFiles}`);
-  files = parsers.tidyData(files, {
-    sliceSample: maxFiles,
-  }) as WorkspaceFile[];
-}
 if (!files.length) cancel(`no files to process, exiting...`);
 
 const entityKinds = kinds
@@ -217,7 +204,7 @@ const stats: FileStats[] = [];
 // process each file serially
 let totalUpdates = 0; // Track total new or updated comments
 for (const file of files) {
-  if (totalUpdates >= maxUpdates) {
+  if (totalUpdates >= maxEdits) {
     dbg(`reached max updates, stopping.`);
     break;
   }
@@ -240,7 +227,7 @@ for (const file of files) {
     await updateDocs(
       file,
       stats.at(-1),
-      () => totalUpdates >= maxUpdates,
+      () => totalUpdates >= maxEdits,
       () => totalUpdates++,
     );
   }
@@ -262,7 +249,7 @@ for (const file of files) {
     await generateDocs(
       file,
       stats.at(-1),
-      () => totalUpdates >= maxUpdates,
+      () => totalUpdates >= maxEdits,
       () => totalUpdates++,
     );
   }
