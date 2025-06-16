@@ -75,7 +75,7 @@ You should pretify your code before and after running this script to normalize t
       description: `If true, only generate docs for exported entities.`,
       default: false,
     },
-    flexTokens: {
+    maxContext: {
       type: "integer",
       description: "Maximum number of tokens to build content of requests.",
       default: 12000,
@@ -94,7 +94,7 @@ const {
   updateExisting,
   maxEdits,
   instructions,
-  flexTokens,
+  maxContext,
   kinds,
   exportsOnly,
   judge
@@ -110,7 +110,7 @@ dbg({
   updateExisting,
   maxEdits,
   instructions,
-  flexTokens,
+  maxContext,
   kinds,
   exportsOnly,
   judge
@@ -334,7 +334,7 @@ async function generateDocs(
           {
             model,
             responseType: "text",
-            flexTokens,
+            flexTokens: maxContext,
             label: declText.slice(0, 20) + "...",
             cache,
           }
@@ -365,7 +365,7 @@ async function generateDocs(
               model,
               responseType: "text",
               temperature: 0.2,
-              flexTokens,
+              flexTokens: maxContext,
               cache,
               systemSafety: false,
               system: ["system.technical", "system.typescript"],
@@ -495,7 +495,7 @@ docstring:
       {
         model,
         responseType: "text",
-        flexTokens,
+        flexTokens: maxContext,
         label: declText.slice(0, 20) + "...",
         cache,
         temperature: 0.2,

@@ -23,7 +23,7 @@ You must set "Allow GitHub Actions to create and approve pull requests" in your 
 - `exports_only`: If true, only process exported entities. (default: `false`)
 - `update_existing`: Update existing docs (increases cost). (default: `false`)
 - `instructions`: Additional prompting instructions for the LLM.
-- `flex_tokens`: Maximum number of tokens to build content of requests. (default: `12000`)
+- `max_context`: Maximum number of tokens to build content of requests. (default: `12000`)
 - `max_edits`: Maximum number of new or updated comments total. (default: `50`)
 - `dry_run`: If true, the script will not modify files. (default: `false`)
 - `mock`: If true, the script will insert a mock comment instead of actual documentation. (default: `false`)
