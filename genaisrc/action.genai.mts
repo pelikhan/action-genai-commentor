@@ -29,6 +29,11 @@ You should pretify your code before and after running this script to normalize t
       default: false,
       description: "If true, the script will not modify files.",
     },
+    mock: {
+      type: "boolean",
+      default: false,
+      description: "If true, the script will mock LLM results.",
+    },
     missing: {
       type: "boolean",
       default: true,
@@ -68,6 +73,7 @@ let { files } = env;
 const {
   model = "large",
   dryRun,
+  mock,
   missing,
   update,
   maxFiles,
@@ -80,6 +86,7 @@ const applyEdits = !dryRun;
 dbg({
   model,
   dryRun,
+  mock,
   applyEdits,
   missing,
   update,
@@ -186,15 +193,46 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats, shouldSto
     file.filename,
     {
       rule: {
-        kind: "export_statement",
-        not: {
-          follows: {
-            kind: "comment",
-            stopBy: "neighbor",
-          },
-        },
+        kind: "program",
         has: {
-          kind: "function_declaration",
+          any: [
+            {
+              kind: "function_declaration",
+              not: {
+                follows: {
+                  kind: "comment",
+                  stopBy: "neighbor",
+                },
+              },
+            },
+            {
+              kind: "class_declaration",
+              not: {
+                follows: {
+                  kind: "comment",
+                  stopBy: "neighbor",
+                },
+              },
+            },
+            {
+              kind: "interface_declaration",
+              not: {
+                follows: {
+                  kind: "comment",
+                  stopBy: "neighbor",
+                },
+              },
+            },
+            {
+              kind: "type_alias_declaration",
+              not: {
+                follows: {
+                  kind: "comment",
+                  stopBy: "neighbor",
+                },
+              },
+            },
+          ],
         },
       },
     },
@@ -204,34 +242,40 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats, shouldSto
 
   // build a changeset to accumate edits
   const edits = sg.changeset();
-  // for each match, generate a docstring for functions not documented
+  // for each match, generate a docstring for declarations not documented
   for (const missingDoc of missingDocs) {
     if (shouldStop()) break;
-    const res = await runPrompt(
+    // Find the child node that is the declaration
+    let declKind = "declaration";
+    let declNode = null;
+    for (const kind of ["function_declaration", "class_declaration", "interface_declaration", "type_alias_declaration"]) {
+      const node = missingDoc.find(kind);
+      if (node) {
+        declNode = node;
+        if (kind === "function_declaration") declKind = "function";
+        else if (kind === "class_declaration") declKind = "class";
+        else if (kind === "interface_declaration") declKind = "interface";
+        else if (kind === "type_alias_declaration") declKind = "type alias";
+        break;
+      }
+    }
+    const res = mock ? { error: null, text: "/** GENDOC */", usage: undefined } : await runPrompt(
       (_) => {
-        // TODO: review what's the best context to provide enough for the LLM to generate docs
-        const fileRef = _.def("FILE", missingDoc.getRoot().root().text(), {
-          flex: 1,
-        }); // TODO: make this optional or insert
-        const functionRef = _.def("FUNCTION", missingDoc.text(), { flex: 10 }); // TODO: expand around function
-
-        // this needs more eval-ing
-        _.$`Generate a TypeScript function documentation for ${functionRef}.
-                - Make sure parameters are documented.
-                - Be concise. Use technical tone.
-                - do NOT include types, this is for TypeScript.
-                - Use docstring syntax (https://tsdoc.org/). do not wrap in markdown code section.
-    
-                The full source of the file is in ${fileRef} for reference.`.role(
-          "system"
-        );
+        const fileRef = _.def("FILE", missingDoc.getRoot().root().text(), { flex: 1 });
+        const declRef = _.def("DECLARATION", (declNode ? declNode.text() : missingDoc.text()), { flex: 10 });
+        _.$`Generate a TypeScript documentation comment for the exported ${declKind} ${declRef}.
+                - Make sure parameters, type parameters, and return types are documented if relevant.
+                - Be concise. Use a technical tone.
+                - Do NOT include types, this is for TypeScript.
+                - Use docstring syntax (https://tsdoc.org/). Do not wrap in markdown code section.
+                The full source of the file is in ${fileRef} for reference.`.role("system");
         if (instructions) _.$`${instructions}`.role("system");
       },
       {
         model,
         responseType: "text",
         flexTokens,
-        label: missingDoc.text()?.slice(0, 20) + "...",
+        label: (declNode ? declNode.text() : missingDoc.text())?.slice(0, 20) + "...",
         cache,
       }
     );
@@ -246,7 +290,7 @@ async function generateDocs(file: WorkspaceFile, fileStats: FileStats, shouldSto
     const docs = docify(res.text.trim(), missingDoc);
 
     // sanity check
-    const judge = await classify(
+    const judge = mock ? { label: "ok", usage: undefined, answer: undefined } : await classify(
       (_) => {
         _.def("FUNCTION", missingDoc.text());
         _.def("DOCS", docs);
@@ -300,13 +344,25 @@ async function updateDocs(file: WorkspaceFile, fileStats: FileStats, shouldStop:
     "ts",
     file.filename,
     YAML`
-rule: 
-  kind: "export_statement"
-  follows: 
-    kind: "comment"
-    stopBy: neighbor
+rule:
+  kind: "program"
   has:
-      kind: "function_declaration"
+    - kind: "function_declaration"
+      follows:
+        kind: "comment"
+        stopBy: neighbor
+    - kind: "class_declaration"
+      follows:
+        kind: "comment"
+        stopBy: neighbor
+    - kind: "interface_declaration"
+      follows:
+        kind: "comment"
+        stopBy: neighbor
+    - kind: "type_alias_declaration"
+      follows:
+        kind: "comment"
+        stopBy: neighbor
 `,
     { applyGitIgnore: false }
   );
@@ -419,7 +475,7 @@ rule:
 function docify(docs: string, node: SgNode) {
   const range = node.range();
   dbg(`node range: %o`, range);
-  const indentation = " ".repeat(node.range().start.column);
+  const indentation = " ".repeat(range.start.column);
   dbg(`indentation: %s`, indentation);
 
   // TODO: use tsdoc package to validate/normalize docs

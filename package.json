@@ -16,7 +16,7 @@
     "typecheck": "genaiscript scripts compile",
     "configure": "genaiscript configure action",
     "test": "echo 'No tests defined.'",
-    "dev": "DEBUG=script genaiscript run action test/cowsay.ts --vars dryRun=true",
+    "dev": "DEBUG=script genaiscript run action test/cowsay.ts --vars dryRun=true mock=true",
     "start": "DEBUG=script* genaiscript run action --github-workspace --no-run-trace --no-output-trace",
     "release": "sh release.sh"
   }
