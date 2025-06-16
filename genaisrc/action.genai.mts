@@ -90,11 +90,6 @@ You should pretify your code before and after running this script to normalize t
 const { output, dbg, vars } = env;
 const cache = true;
 
-console.error({ vars });
-
-for (const k of Object.keys(process.env).filter((k) => k.startsWith("INPUT_")))
-  console.error(`env: %s=%s`, k, process.env[k]);
-
 let { files } = env;
 const {
   model = "large",
@@ -223,7 +218,7 @@ const stats: FileStats[] = [];
 let totalUpdates = 0; // Track total new or updated comments
 for (const file of files) {
   if (totalUpdates >= maxUpdates) {
-    dbg(`Reached maxUpdates (${maxUpdates}), stopping.`);
+    dbg(`reached max updates, stopping.`);
     break;
   }
   console.debug(file.filename);
@@ -246,7 +241,7 @@ for (const file of files) {
       file,
       stats.at(-1),
       () => totalUpdates >= maxUpdates,
-      () => totalUpdates++
+      () => totalUpdates++,
     );
   }
 
@@ -268,7 +263,7 @@ for (const file of files) {
       file,
       stats.at(-1),
       () => totalUpdates >= maxUpdates,
-      () => totalUpdates++
+      () => totalUpdates++,
     );
   }
 }
@@ -278,7 +273,7 @@ if (stats.length)
     // filter out rows with no edits or generation
     stats
       .filter((row) =>
-        Object.values(row).some((d) => typeof d === "number" && d > 0)
+        Object.values(row).some((d) => typeof d === "number" && d > 0),
       )
       // Format the numbers
       .map((row) => ({
@@ -298,7 +293,7 @@ async function generateDocs(
   file: WorkspaceFile,
   fileStats: FileStats,
   shouldStop: () => boolean,
-  onUpdate: () => void
+  onUpdate: () => void,
 ) {
   const { matches: missingDocs } = await sg.search(
     "ts",
@@ -315,7 +310,7 @@ async function generateDocs(
         },
       },
     },
-    { applyGitIgnore: false }
+    { applyGitIgnore: false },
   );
   dbg(`found ${missingDocs.length} missing docs`);
 
@@ -357,7 +352,6 @@ async function generateDocs(
             cache,
           }
         );
-    // if generation is successful, insert the docs
     fileStats.gen += res.usage?.total || 0;
     fileStats.genCost += res.usage?.cost || 0;
     if (res.error) {
@@ -452,7 +446,7 @@ async function updateDocs(
   file: WorkspaceFile,
   fileStats: FileStats,
   shouldStop: () => boolean,
-  onUpdate: () => void
+  onUpdate: () => void,
 ) {
   const { matches } = await sg.search(
     "ts",
@@ -467,10 +461,11 @@ async function updateDocs(
         },
       },
     },
-    { applyGitIgnore: false }
+    { applyGitIgnore: false },
   );
   dbg(`found ${matches.length} docs to updateExisting`);
   const edits = sg.changeset();
+  const pendingCacheUpdates: { body: string; comment: string }[] = [];
   // for each match, generate a docstring for functions not documented
   for (const existingDoc of matches) {
     if (shouldStop()) break;
@@ -489,26 +484,26 @@ async function updateDocs(
         _.def("DOCSTRING", comment.text(), { flex: 10 });
         // this needs more eval-ing
         _.$`Update the TypeScript docstring <DOCSTRING> to match the code in ${declKind} ${declRef}.
-                - If the docstring is up to date, return /NO/. It's ok to leave it as is.
-                - do not rephrase an existing sentence if it is correct.
-                - Make sure parameters are documented.
-                - do NOT include types, this is for TypeScript.
-                - Use docstring syntax. do not wrap in markdown code section.
-                - Minimize updates to the existing docstring.
-                
-                The full source of the file is in <FILE> for reference.
-                The source of the function is in ${declRef}.
-                The current docstring is <DOCSTRING>.
+- If the docstring is up to date, return /NO/. It's ok to leave it as is.
+- do not rephrase an existing sentence if it is correct.
+- Make sure parameters are documented.
+- do NOT include types, this is for TypeScript.
+- Use docstring syntax. do not wrap in markdown code section.
+- Minimize updates to the existing docstring.
 
-                docstring:
+The full source of the file is in <FILE> for reference.
+The source of the function is in ${declRef}.
+The current docstring is <DOCSTRING>.
 
-                /**
-                 * description
-                 * @param param1 - description
-                 * @param param2 - description
-                 * @returns description
-                 */
-                `;
+docstring:
+
+/**
+ * description
+ * @param param1 - description
+ * @param param2 - description
+ * @returns description
+ */
+`;
       },
       {
         model,
@@ -519,7 +514,7 @@ async function updateDocs(
         temperature: 0.2,
         systemSafety: false,
         system: ["system.technical", "system.typescript"],
-      }
+      },
     );
     fileStats.gen += res.usage?.total || 0;
     fileStats.genCost += res.usage?.cost || 0;
@@ -529,10 +524,12 @@ async function updateDocs(
       continue;
     }
 
-    if (res.text.includes("/NO/")) continue;
+    if (res.text.includes("/NO/")) {
+      dbg(`llm says docs are up to date, skipping`);
+      continue;
+    }
 
     const docs = docify(res.text.trim(), comment);
-
     // ask LLM if change is worth it
     const judgeRes =
       mock || !judge
