@@ -38,11 +38,6 @@ You should pretify your code before and after running this script to normalize t
       default: false,
       description: "If true, the script will judge the generated docs.",
     },
-    missing: {
-      type: "boolean",
-      default: true,
-      description: "Generate missing docs.",
-    },
     updateExisting: {
       type: "boolean",
       default: false,
@@ -89,7 +84,7 @@ const {
   model = "large",
   dryRun,
   mock,
-  missing = true,
+  addMissing = true,
   updateExisting,
   maxEdits,
   instructions,
@@ -105,7 +100,7 @@ dbg({
   dryRun,
   mock,
   applyEdits,
-  missing,
+  addMissing,
   updateExisting,
   maxEdits,
   instructions,
@@ -115,7 +110,7 @@ dbg({
   judge
 });
 
-if (!missing && !updateExisting) cancel(`not generating or updating docs, exiting...`);
+if (!addMissing && !updateExisting) cancel(`not generating or updating docs, exiting...`);
 if (!files.length) cancel(`no files to process, exiting...`);
 
 const entityKinds = kinds
@@ -232,7 +227,7 @@ for (const file of files) {
   }
 
   // generate missing docs
-  if (missing) {
+  if (addMissing) {
     stats.push({
       filename: file.filename,
       kind: "new",

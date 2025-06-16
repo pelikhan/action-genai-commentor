@@ -19,12 +19,8 @@ inputs:
   instructions:
     description: Additional prompting instructions for the LLM.
     required: false
-  missing:
-    description: Generate comments for missing docs.
-    required: false
-    default: true
-  update:
-    description: Update existing docs.
+  update_existing:
+    description: Update existing code comments
     required: false
     default: false
   max_edits:

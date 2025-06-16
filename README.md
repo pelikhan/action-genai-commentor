@@ -44,7 +44,7 @@ with:
 ## Example
 
 ```yaml
-name: My action
+name: Improve Code Comments
 on:
   push:
     branches:
@@ -62,11 +62,21 @@ jobs:
   run-script:
     runs-on: ubuntu-latest
     steps:
+      # Cache the generated model requests made by GenAIScript
+      #
+      # A new cache is created for each run to ensure that the latest model requests are used,
+      # but previous caches can be restored and reused if availble.
+      - uses: actions/cache@v4
+        with:
+          path: .genaiscript/cache/**
+          key: genaiscript-${{ github.run_id }}
+          restore-keys: |
+            genaiscript-
       - uses: actions/checkout@v4
       - uses: pelikhan/action-genai-commentor@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          instructions: "Write documentation in German."
+          update_existing: true
           max_edits: 10
 ```
 
