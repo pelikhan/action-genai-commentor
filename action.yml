@@ -1,17 +1,26 @@
 name: action-genai-commentor
 description: Generate TypeScript function documentation using AST insertion
 inputs:
+  github_token:
+    description: "GitHub token with `models: read` permission at least."
+    required: true
   model:
-    description: The model to use for generating comments.
+    description: The model to use for generating comments, e.g. `github:openai/gpt-4.1-mini`.
+    required: false
+    default: github:openai/gpt-4.1-mini
+  kinds:
+    description: Comma-separated list of kinds of entities to process: interface,class,function,enum,typeAlias,property,method,variable
+    required: false
+    default: interface,class,function,enum,typeAlias,property,method
+  exports_only:
+    description: If true, the script will only process exported entities.
+    required: false
+    default: false
   instructions:
     description: Additional prompting instructions for the LLM.
     required: false
-  dry_run:
-    description: If true, the script will not modify files.
-    required: false
-    default: false
   missing:
-    description: Generate missing docs.
+    description: Generate comments for missing docs.
     required: false
     default: true
   update:
@@ -21,7 +30,7 @@ inputs:
   max_files:
     description: Maximum number of files to process.
     required: false
-    default: 1000
+    default: 10000
   max_updates:
     description: Maximum number of new or updated comments total.
     required: false
@@ -30,9 +39,18 @@ inputs:
     description: Maximum number of tokens to build content of requests.
     required: false
     default: 12000
-  github_token:
-    description: "GitHub token with `models: read` permission at least."
-    required: true
+  judge:
+    description: If true, the script will judge the quality of generated comments.
+    required: false
+    default: false
+  dry_run:
+    description: If true, the script will not modify files.
+    required: false
+    default: false
+  mock:
+    description: If true, the script will insert a mock comment
+    required: false
+    default: false
   debug:
     description: Enable debug logging.
     required: false

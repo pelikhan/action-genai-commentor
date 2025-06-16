@@ -16,7 +16,10 @@
     "typecheck": "genaiscript scripts compile",
     "configure": "genaiscript configure action",
     "test": "echo 'No tests defined.'",
-    "dev": "DEBUG=script genaiscript run action test/cowsay.ts --vars dryRun=true mock=true",
+    "mock-TypeScript": "DEBUG=script genaiscript run action ../TypeScript/src/**/*.ts --vars dryRun=true mock=true maxUpdates=10000",
+    "mini-TypeScript": "DEBUG=script genaiscript run action ../TypeScript/src/**/*.ts --vars dryRun=true maxUpdates=2",
+    "mock-cowsay": "DEBUG=script genaiscript run action test/cowsay.ts --vars dryRun=true mock=true",
+    "mini-cowsay": "DEBUG=script genaiscript run action test/cowsay.ts --vars dryRun=true maxUpdates=2",
     "start": "DEBUG=script* genaiscript run action --github-workspace --no-run-trace --no-output-trace",
     "release": "sh release.sh"
   }
