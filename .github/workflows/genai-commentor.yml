@@ -34,7 +34,7 @@ jobs:
         uses: ./
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: test/**/*.ts
+          files: "test/**/*.ts"
           model: github:openai/gpt-4.1-mini
 
       # Create a pull request with the changes

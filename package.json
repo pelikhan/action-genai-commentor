@@ -27,6 +27,7 @@
     "mini-python-write-docs": "DEBUG=script* genaiscript run action test/python-without-docs.py --vars dryRun=true maxEdits=2",
     "mock-python-revise-docs": "DEBUG=script* genaiscript run action test/python-with-docs.py --vars dryRun=true mock=true updateExisting=true",
     "mini-python-revise-docs": "DEBUG=script* genaiscript run action test/python-with-docs.py --vars dryRun=true maxEdits=2 updateExisting=true",
+    "mock": "DEBUG=script* genaiscript run action --vars dryRun=true updateExisting=true mock=true",
     "start": "DEBUG=script* genaiscript run action --github-workspace --no-run-trace --no-output-trace",
     "release": "sh release.sh"
   }
