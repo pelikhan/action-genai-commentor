@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "A GitHub Action to generate TypeScript comments.",
   "dependencies": {
+    "@ast-grep/lang-python": "^0.0.2",
     "genaiscript": "1.142.9"
   },
   "scripts": {
@@ -18,8 +19,10 @@
     "test": "echo 'No tests defined.'",
     "mock-TypeScript": "DEBUG=script genaiscript run action ../TypeScript/src/**/*.ts --vars dryRun=true mock=true maxEdits=10000",
     "mini-TypeScript": "DEBUG=script genaiscript run action ../TypeScript/src/**/*.ts --vars dryRun=true maxEdits=2",
-    "mock-cowsay": "DEBUG=script genaiscript run action test/cowsay.ts --vars dryRun=true mock=true",
-    "mini-cowsay": "DEBUG=script genaiscript run action test/cowsay.ts --vars dryRun=true maxEdits=2",
+    "mock-typescript-write-docs": "DEBUG=script genaiscript run action test/typescript-without-docs.ts --vars dryRun=true mock=true",
+    "mini-typescript-write-docs": "DEBUG=script genaiscript run action test/typescript-without-docs.ts --vars dryRun=true maxEdits=2",
+    "mock-python-write-docs": "DEBUG=script genaiscript run action test/python-without-docs.py --vars dryRun=true mock=true",
+    "mini-python-write-docs": "DEBUG=script genaiscript run action test/python-without-docs.py --vars dryRun=true maxEdits=2",
     "start": "DEBUG=script* genaiscript run action --github-workspace --no-run-trace --no-output-trace",
     "release": "sh release.sh"
   }
