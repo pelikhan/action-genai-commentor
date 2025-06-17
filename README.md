@@ -52,7 +52,7 @@ on:
       - main
   workflow_dispatch:
 permissions:
-    contents: read
+    contents: write
     pull-requests: write
     models: read
 concurrency:
