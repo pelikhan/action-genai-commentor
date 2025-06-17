@@ -202,11 +202,12 @@ for (const file of files) {
     });
     await addMissingDocs(file, stats.at(-1));
   }
+  
 }
 
-if (stats.length)
-  output.table(
-    // filter out rows with no edits or generation
+if (stats.length) {
+  // filter out rows with no edits or generation
+  const table =
     stats
       .filter((row) =>
         Object.values(row).some((d) => typeof d === "number" && d > 0)
@@ -222,8 +223,10 @@ if (stats.length)
         updated: row.updated.toFixed(0),
         nits: row.nits?.toFixed(0) || "N/A",
         refused: row.refused.toFixed(0),
-      }))
-  );
+      }));
+
+  output.table(table);
+}
 
 function getDeclKinds(language: SgLang, withDocs: boolean): SgRule {
   if (language === "python") {
