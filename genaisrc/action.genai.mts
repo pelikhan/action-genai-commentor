@@ -109,7 +109,7 @@ const {
 const applyEdits = !dryRun;
 
 dbg({
-  files,
+  files: files.map((f) => f.filename),
   model,
   dryRun,
   mock,
