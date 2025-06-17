@@ -85,7 +85,7 @@ You should pretify your code before and after running this script to normalize t
     maxContext: {
       type: "integer",
       description: "Maximum number of tokens to build content of requests.",
-      default: 12000,
+      default: 6000,
     },
   },
 });

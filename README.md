@@ -19,12 +19,12 @@ You must set "Allow GitHub Actions to create and approve pull requests" in your 
 
 - `github_token`: GitHub token with `models: read` permission at least. (required)
 - `model`: The model to use for generating documentation. (default: `github:openai/gpt-4.1-mini`)
-- `files`: The files to process, in glob format. (default: `**/src/**/*.{ts,tsx,mts,cts}`)
+- `files`: The files to process, in glob format. (default: `**/src/**/*.{,py}`)
 - `kinds`: Comma-separated list of kinds of entities to process: interface,class,function,enum,typeAlias,property,method,variable. (default: all but variable)
 - `exports_only`: If true, only process exported entities. (default: `false`)
 - `update_existing`: Update existing docs (increases cost). (default: `false`)
 - `instructions`: Additional prompting instructions for the LLM.
-- `max_context`: Maximum number of tokens to build content of requests. (default: `12000`)
+- `max_context`: Maximum number of tokens to build content of requests. (default: `6000`)
 - `max_edits`: Maximum number of new or updated comments total. (default: `50`)
 - `judge`: If true, the script will judge the quality of generated comments. (default: `false`)
 - `dry_run`: If true, the script will not modify files. (default: `false`)
@@ -39,7 +39,7 @@ Add the following to your step in your workflow file:
 uses: pelikhan/action-genai-commentor@main
 with:
   github_token: ${{ secrets.GITHUB_TOKEN }}
-  files: '**/src/**/*.{ts,tsx,mts,cts}'
+  files: '**/src/**/*.{ts,tsx,mts,cts,py}'
 ```
 
 ## Example
@@ -79,8 +79,8 @@ jobs:
         uses: pelikhan/action-genai-commentor@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          update_existing: true
-          max_edits: 10
+          max_edits: 100
+          files: '**/src/**/*.py'
 
       # Create a pull request with the changes
       - name: create pull request
