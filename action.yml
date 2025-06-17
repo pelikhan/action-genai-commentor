@@ -9,9 +9,9 @@ inputs:
     required: false
     default: github:openai/gpt-4.1-mini
   kinds:
-    description: "Comma-separated list of kinds of entities to process: interface,class,function,enum,typeAlias,property,method,variable"
+    description: "Comma-separated list of kinds of entities to process: function.interface,class,enum,typeAlias,property,method,variable"
     required: false
-    default: "interface,class,function,enum,typeAlias,property,method"
+    default: "function,interface,class,enum,typeAlias,property,method"
   exports_only:
     description: If true, the script will only process exported entities.
     required: false
