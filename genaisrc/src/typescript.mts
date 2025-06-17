@@ -66,7 +66,7 @@ export function docifyTypescript(docs: string) {
   docs = parsers.unfence(docs, "*");
 
   if (!/^\s*\/\*\*.*.*\*\/\s*$/s.test(docs))
-    docs = `/**\n* ${docs.split(/\r?\n/g).join("\n* ")}\n*/`;
+    docs = `/**\n * ${docs.split(/\r?\n/g).join("\n * ")}\n */`;
   return docs;
 }
 

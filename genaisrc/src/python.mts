@@ -1,11 +1,9 @@
-const dbg = host.logger("script:classify");
+const dbg = host.logger("script:python");
 
 export function getDeclKindsPython(entityKinds: string[], withDocs: boolean) {
   const declKinds: SgRule = {
     any: [
-      entityKinds.includes("function")
-        ? { kind: "function_definition" }
-        : null,
+      entityKinds.includes("function") ? { kind: "function_definition" } : null,
       //entityKinds.includes("class") ? { kind: "class_definition" } : null,
     ].filter(Boolean) as SgRule[],
   };
@@ -37,27 +35,32 @@ export function getDeclKindsPython(entityKinds: string[], withDocs: boolean) {
   const docsRule: SgRule = withDocs
     ? withDocstring
     : {
-      not: withDocstring,
-    };
+        not: withDocstring,
+      };
 
   return { ...declKinds, ...inside, ...docsRule };
 }
 
 export function getDocNodeFromDeclPython(decl: SgNode): SgNode {
-    // Find the comment that follows the declaration
-    const docstring = decl.find("expression_statement > string");
-    if (!docstring) {
-      dbg(`no docstring found for %s`, decl.text());
-      return decl;
-    }
-    dbg(`found comment: %s`, docstring.text());
-    return docstring;
+  // Find the comment that follows the declaration
+  const docstring = decl
+    .find({ rule: { kind: "block" } })
+    ?.find({ rule: { kind: "expression_statement" } })
+    ?.find({ rule: { kind: "string" } });
+  if (!docstring) {
+    dbg(`no docstring found for %s`, decl.text());
+    return decl;
+  }
+  dbg(`found comment: %s`, docstring.text());
+  return docstring;
 }
 
 export function docifyPython(docs: string) {
   docs = parsers.unfence(docs, '"');
   if (!/^\s*""".*.*"""$/s.test(docs)) {
-    docs = `"""${docs.split(/\r?\n/g).join("\n")}${docs.includes("\n") ? "\n" : ""}"""`;
+    docs = `"""${docs.split(/\r?\n/g).join("\n")}${
+      docs.includes("\n") ? "\n" : ""
+    }"""`;
   }
   return docs;
 }
@@ -65,4 +68,3 @@ export function docifyPython(docs: string) {
 export function getNodeToInsertDocPython(node: SgNode) {
   return node.find({ rule: { kind: "block" } });
 }
-
