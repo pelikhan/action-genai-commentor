@@ -22,6 +22,7 @@ the documentation.
 You should pretify your code before and after running this script to normalize the formatting.
 `,
   accept: ".ts,.mts,.tsx,.mtsx,.cts,.py",
+  files: ["**/*.{ts,mts,tsx,mtsx,cts,py}"],
   branding: {
     color: "yellow",
     icon: "filter",
