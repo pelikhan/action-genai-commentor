@@ -1,4 +1,9 @@
-export type EntityKind = "module" | "type" | "function" | "property" | "variable";
+export type EntityKind =
+  | "module"
+  | "type"
+  | "function"
+  | "property"
+  | "variable";
 
 export interface LanguageOps {
   getCommentableNodesMatcher: (

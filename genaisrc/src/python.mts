@@ -75,11 +75,7 @@ class Python implements LanguageOps {
     return docs;
   }
 
-  addUpdateDocPrompt(
-    _: ChatGenerationContext,
-    declKind: any,
-    declRef: string
-  ) {
+  addUpdateDocPrompt(_: ChatGenerationContext, declKind: any, declRef: string) {
     return _.$`Update the Python docstring <DOCSTRING> to match the code in ${declKind} ${declRef}.
 - If the docstring is up to date, return /NO/. It's ok to leave it as is.
 - do not rephrase an existing sentence if it is correct.

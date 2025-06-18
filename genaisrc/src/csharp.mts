@@ -45,7 +45,7 @@ class CSharp implements LanguageOps {
     // If export only then require an 'export'
     const declKinds: SgRule = {
       any: [
-        declKindsRaw
+        declKindsRaw,
         // exportsOnly ? { any: [] } : declKindsRaw,
         // {
         //   kind: "export_statement",
@@ -55,8 +55,7 @@ class CSharp implements LanguageOps {
     };
     const inside: SgRule = {
       inside: {
-        all: [
-        ],
+        all: [],
       },
     };
     const withDocComment: SgRule = {
@@ -93,7 +92,10 @@ class CSharp implements LanguageOps {
   getCommentText(docs: string) {
     docs = parsers.unfence(docs, "*");
 
-    docs = `/// ${docs.split(/\r?\n/g).map((s) => s.trim()).join("/// ")}`;
+    docs = `/// ${docs
+      .split(/\r?\n/g)
+      .map((s) => s.trim())
+      .join("/// ")}`;
     return docs;
   }
   addGenerateDocPrompt(
