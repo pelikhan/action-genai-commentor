@@ -1,10 +1,10 @@
 {
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A GitHub Action to generate TypeScript comments.",
   "dependencies": {
     "@ast-grep/lang-python": "^0.0.2",
-    "genaiscript": "1.142.14"
+    "genaiscript": "1.142.15"
   },
   "scripts": {
     "upgrade": "npx -y npm-check-updates -u && npm install && npm run fix",

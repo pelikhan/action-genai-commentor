@@ -205,7 +205,7 @@ if (stats.length) {
   // filter out rows with no edits or generation
   const table = stats
     .filter((row) =>
-      Object.values(row).some((d) => typeof d === "number" && d > 0)
+      Object.values(row).some((d) => typeof d === "number" && d > 0),
     )
     // Format the numbers
     .map((row) => ({
@@ -263,7 +263,7 @@ async function addMissingDocs(file: WorkspaceFile, fileStats: FileStats) {
             flexTokens: maxContext,
             label: declText.slice(0, 20) + "...",
             cache,
-          }
+          },
         );
     fileStats.gen += res.usage?.total || 0;
     fileStats.genCost += res.usage?.cost || 0;
@@ -303,7 +303,7 @@ async function addMissingDocs(file: WorkspaceFile, fileStats: FileStats) {
                 "system.technical",
                 langOps.getLanguageSystemPromptName(),
               ],
-            }
+            },
           );
     fileStats.judge += judgeRes.usage?.total || 0;
     fileStats.judgeCost += judgeRes.usage?.cost || 0;
@@ -382,7 +382,7 @@ async function updateDocs(file: WorkspaceFile, fileStats: FileStats) {
             temperature: 0.2,
             systemSafety: false,
             system: ["system.technical", langOps.getLanguageSystemPromptName()],
-          }
+          },
         );
     fileStats.gen += res.usage?.total || 0;
     fileStats.genCost += res.usage?.cost || 0;
@@ -429,7 +429,7 @@ async function updateDocs(file: WorkspaceFile, fileStats: FileStats) {
                 "system.technical",
                 langOps.getLanguageSystemPromptName(),
               ],
-            }
+            },
           );
 
     fileStats.judge += judgeRes.usage?.total || 0;
@@ -461,7 +461,7 @@ async function updateDocs(file: WorkspaceFile, fileStats: FileStats) {
     output.diff(file, modifiedFiles[0]);
   }
   dbg(
-    `updated ${file.filename} by updating ${fileStats.generated} existing comments`
+    `updated ${file.filename} by updating ${fileStats.generated} existing comments`,
   );
 }
 
