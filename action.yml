@@ -43,7 +43,7 @@ inputs:
     default: 6000
   files:
     description: Files to process, separated by semi columns (;).
-      .ts,.mts,.tsx,.mtsx,.cts,.py
+      .ts,.mts,.tsx,.mtsx,.cts,.py,.cs
     required: false
   github_token:
     description: "GitHub token with `models: read` permission at least

@@ -493,7 +493,7 @@ function getLanguage(file: WorkspaceFile): SgLang {
     ? "python"
     : file.filename.endsWith(".cs") || file.filename.endsWith(".csx")
     ? "csharp"
-    : "ts";
+    : "typescript";
 }
 
 function getDeclNodeAndKind(decl: SgNode) {
