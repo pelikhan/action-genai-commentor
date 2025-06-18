@@ -95,6 +95,7 @@ class Typescript implements LanguageOps {
 - Be concise. Use a technical tone.
 - Do NOT include types, this is for TypeScript.
 - Use docstring syntax (https://tsdoc.org/). Do not wrap in markdown code section.
+- Start the comment with "/**" and end with "*/".
 The full source of the file is in ${fileRef} for reference.`;
   }
 
