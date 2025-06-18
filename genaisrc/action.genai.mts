@@ -202,28 +202,26 @@ for (const file of files) {
     });
     await addMissingDocs(file, stats.at(-1));
   }
-  
 }
 
 if (stats.length) {
   // filter out rows with no edits or generation
-  const table =
-    stats
-      .filter((row) =>
-        Object.values(row).some((d) => typeof d === "number" && d > 0)
-      )
-      // Format the numbers
-      .map((row) => ({
-        ...row,
-        gen: row.gen.toFixed(2),
-        genCost: row.genCost.toFixed(2),
-        judge: row.judge.toFixed(2),
-        judgeCost: row.judgeCost.toFixed(2),
-        generated: row.generated.toFixed(0),
-        updated: row.updated.toFixed(0),
-        nits: row.nits?.toFixed(0) || "N/A",
-        refused: row.refused.toFixed(0),
-      }));
+  const table = stats
+    .filter((row) =>
+      Object.values(row).some((d) => typeof d === "number" && d > 0),
+    )
+    // Format the numbers
+    .map((row) => ({
+      ...row,
+      gen: row.gen.toFixed(2),
+      genCost: row.genCost.toFixed(2),
+      judge: row.judge.toFixed(2),
+      judgeCost: row.judgeCost.toFixed(2),
+      generated: row.generated.toFixed(0),
+      updated: row.updated.toFixed(0),
+      nits: row.nits?.toFixed(0) || "N/A",
+      refused: row.refused.toFixed(0),
+    }));
 
   output.table(table);
 }
@@ -289,7 +287,7 @@ The full source of the file is in ${fileRef} for reference.`.role("system");
             flexTokens: maxContext,
             label: declText.slice(0, 20) + "...",
             cache,
-          }
+          },
         );
     fileStats.gen += res.usage?.total || 0;
     fileStats.genCost += res.usage?.cost || 0;
@@ -323,7 +321,7 @@ The full source of the file is in ${fileRef} for reference.`.role("system");
               cache,
               systemSafety: false,
               system: ["system.technical", getSystemPrompt(language)],
-            }
+            },
           );
     fileStats.judge += judgeRes.usage?.total || 0;
     fileStats.judgeCost += judgeRes.usage?.cost || 0;
@@ -426,7 +424,7 @@ docstring:
             temperature: 0.2,
             systemSafety: false,
             system: ["system.technical", getSystemPrompt(language)],
-          }
+          },
         );
     fileStats.gen += res.usage?.total || 0;
     fileStats.genCost += res.usage?.cost || 0;
@@ -465,7 +463,7 @@ docstring:
               systemSafety: false,
               cache,
               system: ["system.technical", getSystemPrompt(language)],
-            }
+            },
           );
 
     fileStats.judge += judgeRes.usage?.total || 0;
@@ -492,7 +490,7 @@ docstring:
     output.diff(file, modifiedFiles[0]);
   }
   dbg(
-    `updated ${file.filename} by updating ${fileStats.generated} existing comments`
+    `updated ${file.filename} by updating ${fileStats.generated} existing comments`,
   );
 }
 
@@ -519,7 +517,6 @@ function docify(docs: string, node: SgNode, language: SgLang) {
   dbg(`docified docs: <<<%s>>>`, docs);
 
   return docs;
-
 }
 
 function getSystemPrompt(language: SgLang) {

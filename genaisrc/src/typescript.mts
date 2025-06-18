@@ -1,5 +1,9 @@
 const dbg = host.logger("script:classify");
-export function getDeclKindsTypescript(entityKinds: string[], exportsOnly: boolean, withDocs: boolean) {
+export function getDeclKindsTypescript(
+  entityKinds: string[],
+  exportsOnly: boolean,
+  withDocs: boolean,
+) {
   const declKindsRaw: SgRule = {
     any: [
       entityKinds.includes("function")
@@ -12,9 +16,7 @@ export function getDeclKindsTypescript(entityKinds: string[], exportsOnly: boole
       entityKinds.includes("typeAlias")
         ? { kind: "type_alias_declaration" }
         : null,
-      entityKinds.includes("variable")
-        ? { kind: "lexical_declaration" }
-        : null,
+      entityKinds.includes("variable") ? { kind: "lexical_declaration" } : null,
       entityKinds.includes("enum") ? { kind: "enum_declaration" } : null,
       entityKinds.includes("property")
         ? { kind: "public_field_definition" }
@@ -56,8 +58,8 @@ export function getDeclKindsTypescript(entityKinds: string[], exportsOnly: boole
   const docsRule: SgRule = withDocs
     ? withDocComment
     : {
-      not: withDocComment,
-    };
+        not: withDocComment,
+      };
 
   return { ...declKinds, ...inside, ...docsRule };
 }
@@ -71,12 +73,9 @@ export function docifyTypescript(docs: string) {
 }
 
 export function getDocNodeFromDeclTypescript(decl: SgNode): SgNode {
-    return decl.prev();
+  return decl.prev();
 }
-
 
 export function getNodeToInsertDocTypescript(node: SgNode) {
   return node;
 }
-
-
