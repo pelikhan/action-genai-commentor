@@ -124,28 +124,6 @@ To typecheck the scripts, run:
 npm run typecheck
 ```
 
-To build the Docker image locally, run:
-```bash
-npm run docker:build
-```
-
-To run the action locally in Docker (build it first), use:
-```bash
-npm run docker:start
-```
-
-To run the action using [act](https://nektosact.com/), first install the act CLI:
-
-```bash
-npm run act:install
-```
-
-Then, you can run the action with:
-
-```bash
-npm run act
-```
-
 ## Upgrade
 
 The GenAIScript version is pinned in the `package.json` file. To upgrade it, run:

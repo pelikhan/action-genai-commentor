@@ -14,11 +14,10 @@ import {
 
 script({
   title: "Generate code comments using AST insertion",
-  description: `This script generates and updates code comments using an AST/LLM hybrid approach.
+  description: `Generates and updates code comments using an AST/LLM hybrid approach.
 It uses ast-grep to look for undocumented and documented functions, classes, interfaces, and other
 entities in the codebase, then uses a combination of LLM, and LLM-as-a-judge to generate and validate
 the documentation.
-
 You should pretify your code before and after running this script to normalize the formatting.
 `,
   accept: ".ts,.mts,.tsx,.mtsx,.cts,.py",
