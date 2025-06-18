@@ -1,16 +1,8 @@
 import { classify } from "./src/classify.mts";
-import {
-  docifyPython,
-  getDeclKindsPython,
-  getDocNodeFromDeclPython,
-  getNodeToInsertDocPython,
-} from "./src/python.mts";
-import {
-  docifyTypescript,
-  getDeclKindsTypescript,
-  getDocNodeFromDeclTypescript,
-  getNodeToInsertDocTypescript,
-} from "./src/typescript.mts";
+import { csharpOps } from "./src/csharp.mts";
+import type { EntityKind, LanguageOps } from "./src/langops.mts";
+import { pythonOps } from "./src/python.mts";
+import { typescriptOps } from "./src/typescript.mts";
 
 script({
   title: "Generate code comments using AST insertion",
@@ -20,8 +12,8 @@ entities in the codebase, then uses a combination of LLM, and LLM-as-a-judge to 
 the documentation.
 You should pretify your code before and after running this script to normalize the formatting.
 `,
-  accept: ".ts,.mts,.tsx,.mtsx,.cts,.py",
-  files: "**/*.{ts,mts,tsx,mtsx,cts,py}",
+  accept: ".ts,.mts,.tsx,.mtsx,.cts,.py,*.cs",
+  files: "**/*.{ts,mts,tsx,mtsx,cts,py,cs}",
   branding: {
     color: "yellow",
     icon: "filter",
@@ -63,18 +55,10 @@ You should pretify your code before and after running this script to normalize t
     kinds: {
       type: "string",
       description: `The kinds of entities to target for documentation generation.
-      This is a comma-separated list of entity types, e.g. "function,class,interface,typeAlias".
+      This is a comma-separated list of entity types, e.g. "module,type,function,property,variable".
       If not specified, all entities will be targeted.
-      Valid values:
-          interface
-          class
-          function
-          variable
-          enum
-          typeAlias
-          property
-          method`,
-      default: "interface,class,function,enum,typeAlias,property,method",
+      Valid values: module,type,function,property,variable`,
+      default: "module,type,function,property",
     },
     exportsOnly: {
       type: "boolean",
@@ -127,10 +111,11 @@ if (!addMissing && !updateExisting)
   cancel(`not generating or updating docs, exiting...`);
 if (!files.length) cancel(`no files to process, exiting...`);
 
-const entityKinds = kinds
+const entityKinds: EntityKind[] = kinds
   .split(",")
   .map((e: string) => e.trim())
   .filter((e: string) => e);
+
 dbg(`entityKinds: %o`, entityKinds);
 
 // launch ast-grep instance
@@ -160,6 +145,18 @@ function shouldStop() {
 function onUpdate() {
   totalUpdates++;
   dbg(`total updates: %d`, totalUpdates);
+}
+
+function getLanguageOps(language: SgLang): LanguageOps {
+  if (language === "python") {
+    return pythonOps;
+  } else if (language === "typescript") {
+    return typescriptOps;
+  } else if (language === "csharp") {
+    return csharpOps;
+  } else {
+    cancel(`unsupported language: ${language}`);
+  }
 }
 
 for (const file of files) {
@@ -202,57 +199,45 @@ for (const file of files) {
     });
     await addMissingDocs(file, stats.at(-1));
   }
-  
 }
 
 if (stats.length) {
   // filter out rows with no edits or generation
-  const table =
-    stats
-      .filter((row) =>
-        Object.values(row).some((d) => typeof d === "number" && d > 0)
-      )
-      // Format the numbers
-      .map((row) => ({
-        ...row,
-        gen: row.gen.toFixed(2),
-        genCost: row.genCost.toFixed(2),
-        judge: row.judge.toFixed(2),
-        judgeCost: row.judgeCost.toFixed(2),
-        generated: row.generated.toFixed(0),
-        updated: row.updated.toFixed(0),
-        nits: row.nits?.toFixed(0) || "N/A",
-        refused: row.refused.toFixed(0),
-      }));
+  const table = stats
+    .filter((row) =>
+      Object.values(row).some((d) => typeof d === "number" && d > 0)
+    )
+    // Format the numbers
+    .map((row) => ({
+      ...row,
+      gen: row.gen.toFixed(2),
+      genCost: row.genCost.toFixed(2),
+      judge: row.judge.toFixed(2),
+      judgeCost: row.judgeCost.toFixed(2),
+      generated: row.generated.toFixed(0),
+      updated: row.updated.toFixed(0),
+      nits: row.nits?.toFixed(0) || "N/A",
+      refused: row.refused.toFixed(0),
+    }));
 
   output.table(table);
 }
 
-function getDeclKinds(language: SgLang, withDocs: boolean): SgRule {
-  if (language === "python") {
-    return getDeclKindsPython(entityKinds, withDocs);
-  } else {
-    return getDeclKindsTypescript(entityKinds, exportsOnly, withDocs);
-  }
-}
-
-function getDocNodeFromDecl(decl: SgNode, language: SgLang): SgNode {
-  if (language === "python") {
-    return getDocNodeFromDeclPython(decl);
-  } else {
-    return getDocNodeFromDeclTypescript(decl);
-  }
-}
-
 async function addMissingDocs(file: WorkspaceFile, fileStats: FileStats) {
   const language = getLanguage(file);
-  const rule = getDeclKinds(language, false);
+  const langOps = getLanguageOps(language);
+  const rule = langOps.getCommentableNodesMatcher(
+    entityKinds,
+    false,
+    exportsOnly
+  );
   dbg(`searching for missing docs in %s`, file.filename);
-  const { matches } = await sg.search(language, file.filename, { rule }, {});
+  const { matches } = await sg.search(language, file.filename, { rule }, { });
   dbg(`found ${matches.length} missing docs`);
 
   // build a changeset to accumate edits
   const edits = sg.changeset();
+
   // for each match, generate a docstring for declarations not documented
   for (const match of matches) {
     if (shouldStop()) break;
@@ -267,20 +252,9 @@ async function addMissingDocs(file: WorkspaceFile, fileStats: FileStats) {
               flex: 1,
             });
             const declRef = _.def("DECLARATION", declText, { flex: 10 });
-            if (language == "python") {
-              _.$`Generate a Python documentation comment for the ${declKind} ${declRef}.
-- Make sure parameters, type parameters, and return types are documented if relevant.
-- Be concise. Use a technical tone.
-- Use docstring syntax (https://peps.python.org/pep-0257/). Do not wrap in markdown code section.
-The full source of the file is in ${fileRef} for reference.`.role("system");
-            } else {
-              _.$`Generate a TypeScript documentation comment for the ${declKind} ${declRef}.
-- Make sure parameters, type parameters, and return types are documented if relevant.
-- Be concise. Use a technical tone.
-- Do NOT include types, this is for TypeScript.
-- Use docstring syntax (https://tsdoc.org/). Do not wrap in markdown code section.
-The full source of the file is in ${fileRef} for reference.`.role("system");
-            }
+            langOps
+              .addGenerateDocPrompt(_, declKind, declRef, fileRef)
+              .role("system");
             if (instructions) _.$`${instructions}`.role("system");
           },
           {
@@ -298,9 +272,12 @@ The full source of the file is in ${fileRef} for reference.`.role("system");
       continue;
     }
 
-    const nodeToAdjust = getNodeToInsertDoc(language, match);
+    const nodeToAdjust0 = langOps.getCommentInsertionNode(match);
+    dbg(`node to adjust0: %o`, nodeToAdjust0.range());
+    const nodeToAdjust = getFirstNode(nodeToAdjust0);
+    dbg(`node to adjust: %o`, nodeToAdjust.range());
 
-    const docs = docify(res.text.trim(), nodeToAdjust, language);
+    const docs = getIndentedCommentText(res.text.trim(), nodeToAdjust, langOps);
 
     // sanity check
     const judgeRes =
@@ -322,7 +299,10 @@ The full source of the file is in ${fileRef} for reference.`.role("system");
               flexTokens: maxContext,
               cache,
               systemSafety: false,
-              system: ["system.technical", getSystemPrompt(language)],
+              system: [
+                "system.technical",
+                langOps.getLanguageSystemPromptName(),
+              ],
             }
           );
     fileStats.judge += judgeRes.usage?.total || 0;
@@ -351,18 +331,38 @@ The full source of the file is in ${fileRef} for reference.`.role("system");
   dbg(`updated ${file.filename} by adding ${fileStats.generated} new comments`);
 }
 
+function getFirstNode(node: SgNode) {
+  // Find the first node 
+  dbg(`getting first node from %o`, node.range(), node.children().length);
+  while (node && node.children().length > 0) {
+    node = node.children()[0];
+    dbg(`next node: %o`, node.range());
+  }
+  return node;
+}
+
 async function updateDocs(file: WorkspaceFile, fileStats: FileStats) {
   const language = getLanguage(file);
-  const rule = getDeclKinds(language, true);
+  const langOps = getLanguageOps(language);
+  const rule = langOps.getCommentableNodesMatcher(
+    entityKinds,
+    true,
+    exportsOnly
+  );
   const { matches } = await sg.search(language, file.filename, { rule }, {});
   dbg(`found ${matches.length} docs to updateExisting`);
   const edits = sg.changeset();
   // for each match, generate a docstring for functions not documented
   for (const match of matches) {
     if (shouldStop()) break;
-    const docsNode = getDocNodeFromDecl(match, language);
+    const docNodes = langOps.getCommentNodes(match);
     let { declNode, declKind } = getDeclNodeAndKind(match);
     const declText = declNode ? declNode.text() : match.text();
+
+    const docsText = docNodes
+      .map((n) => n.text().trim())
+      .join("\n")
+      .trim();
 
     const res = mock
       ? { error: null, text: "UPDATEDOC", usage: undefined }
@@ -370,52 +370,8 @@ async function updateDocs(file: WorkspaceFile, fileStats: FileStats) {
           (_) => {
             const declRef = _.def("DECLARATION", declText, { flex: 10 });
             _.def("FILE", match.getRoot().root().text(), { flex: 1 });
-            _.def("DOCSTRING", docsNode.text(), { flex: 10 });
-            // TODO: this needs more eval-ing
-            if (language == "python") {
-              _.$`Update the Python docstring <DOCSTRING> to match the code in ${declKind} ${declRef}.
-- If the docstring is up to date, return /NO/. It's ok to leave it as is.
-- do not rephrase an existing sentence if it is correct.
-- Make sure parameters are documented.
-- Use docstring syntax (https://peps.python.org/pep-0257/). Do not wrap in markdown code section.
-- Minimize updates to the existing docstring.
-
-The full source of the file is in <FILE> for reference.
-The source of the function is in ${declRef}.
-The current docstring is <DOCSTRING>.
-
-docstring:
-
-"""
-description
-:param param1: description
-:param param2: description
-:return: description
-"""
-`;
-            } else {
-              _.$`Update the TypeScript docstring <DOCSTRING> to match the code in ${declKind} ${declRef}.
-- If the docstring is up to date, return /NO/. It's ok to leave it as is.
-- do not rephrase an existing sentence if it is correct.
-- Make sure parameters are documented.
-- do NOT include types, this is for TypeScript.
-- Use docstring syntax. do not wrap in markdown code section.
-- Minimize updates to the existing docstring.
-
-The full source of the file is in <FILE> for reference.
-The source of the function is in ${declRef}.
-The current docstring is <DOCSTRING>.
-
-docstring:
-
-/**
- * description
- * @param param1 - description
- * @param param2 - description
- * @returns description
- */
-`;
-            }
+            _.def("DOCSTRING", docsText, { flex: 10 });
+            langOps.addUpdateDocPrompt(_, declKind, declRef).role("system");
           },
           {
             model,
@@ -425,7 +381,7 @@ docstring:
             cache,
             temperature: 0.2,
             systemSafety: false,
-            system: ["system.technical", getSystemPrompt(language)],
+            system: ["system.technical", langOps.getLanguageSystemPromptName()],
           }
         );
     fileStats.gen += res.usage?.total || 0;
@@ -441,16 +397,21 @@ docstring:
       continue;
     }
 
-    const docs = docify(res.text.trim(), docsNode, language);
-    // ask LLM if change is worth it
+    const newDocs = getIndentedCommentText(
+      res.text.trim(),
+      docNodes[0],
+      langOps
+    );
+
+    // Ask LLM if change is worth it
     const judgeRes =
       mock || !judge
         ? { label: "ok", usage: undefined, answer: undefined }
         : await classify(
             (_) => {
               const declRef = _.def("DECLARATION", declText, { flex: 10 });
-              _.def("ORIGINAL_DOCS", docsNode.text());
-              _.def("NEW_DOCS", docs);
+              _.def("ORIGINAL_DOCS", docsText);
+              _.def("NEW_DOCS", newDocs);
               _.$`An LLM generated an updated docstring <NEW_DOCS> for ${declKind} ${declRef}. The original docstring is <ORIGINAL_DOCS>.`;
             },
             {
@@ -464,7 +425,10 @@ docstring:
               temperature: 0.2,
               systemSafety: false,
               cache,
-              system: ["system.technical", getSystemPrompt(language)],
+              system: [
+                "system.technical",
+                langOps.getLanguageSystemPromptName(),
+              ],
             }
           );
 
@@ -475,7 +439,12 @@ docstring:
       fileStats.nits++;
       continue;
     }
-    edits.replace(docsNode, docs.trimEnd());
+    edits.replace(docNodes[0], newDocs.trimEnd());
+
+    // TODO: this is not accurate for C# and other languages where docNodes.length > 1, as it leaves whitespace hanging around
+    for (let i = 1; i < docNodes.length; i++) {
+      edits.replace(docNodes[i], "");
+    }
     fileStats.updated++;
     onUpdate();
   }
@@ -496,20 +465,18 @@ docstring:
   );
 }
 
-function docify(docs: string, node: SgNode, language: SgLang) {
+function getIndentedCommentText(
+  docs: string,
+  node: SgNode,
+  langOps: LanguageOps
+): string {
   const range = node.range();
   dbg(`node range: %o`, range);
   const indentation = " ".repeat(range.start.column);
   dbg(`indentation: %s`, indentation);
 
   // TODO: Consider using a schema to restrict docs generation
-  if (language === "python") {
-    // For Python, ensure it is a valid docstring
-    docs = docifyPython(docs);
-  } else {
-    // TODO: For typescript use tsdoc package to validate/normalize docs
-    docs = docifyTypescript(docs);
-  }
+  docs = langOps.getCommentText(docs);
 
   // normalize indentation
   docs = docs.replace(/\r?\n/g, (m) => m + indentation);
@@ -519,53 +486,17 @@ function docify(docs: string, node: SgNode, language: SgLang) {
   dbg(`docified docs: <<<%s>>>`, docs);
 
   return docs;
-
-}
-
-function getSystemPrompt(language: SgLang) {
-  return language === "python" ? "system.python" : "system.typescript";
-}
-
-function getNodeToInsertDoc(language: SgLang, node: SgNode) {
-  return language === "python"
-    ? getNodeToInsertDocPython(node)
-    : getNodeToInsertDocTypescript(node);
 }
 
 function getLanguage(file: WorkspaceFile): SgLang {
-  return file.filename.endsWith(".py") ? "python" : "ts";
+  return file.filename.endsWith(".py")
+    ? "python"
+    : file.filename.endsWith(".cs")
+    ? "csharp"
+    : "ts";
 }
 
-function getDeclNodeAndKind(missingDoc: SgNode) {
-  let declKind = "declaration";
-  let declNode: SgNode | null = null;
-  for (const kind of [
-    "function_declaration",
-    "function_definition",
-    "class_definition",
-    "class_declaration",
-    "interface_declaration",
-    "type_alias_declaration",
-    "lexical_declaration",
-    "enum_declaration",
-    "public_field_definition",
-    "method_definition",
-  ]) {
-    const node = missingDoc.find(kind);
-    if (node) {
-      declNode = node;
-      if (kind === "function_declaration") declKind = "function";
-      else if (kind === "function_definition") declKind = "function";
-      else if (kind === "class_declaration") declKind = "class";
-      else if (kind === "class_definition") declKind = "class";
-      else if (kind === "interface_declaration") declKind = "interface";
-      else if (kind === "type_alias_declaration") declKind = "type alias";
-      else if (kind === "lexical_declaration") declKind = "variable";
-      else if (kind === "enum_declaration") declKind = "enum";
-      else if (kind === "public_field_definition") declKind = "property";
-      else if (kind === "method_definition") declKind = "method";
-      else break;
-    }
-  }
-  return { declNode, declKind };
+function getDeclNodeAndKind(decl: SgNode) {
+  const declKind = decl.kind();
+  return { declNode: decl, declKind };
 }

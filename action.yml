@@ -30,19 +30,9 @@ inputs:
   kinds:
     description: >-
       The kinds of entities to target for documentation generation.
-            This is a comma-separated list of entity types, e.g. "function,class,interface,typeAlias".
-            If not specified, all entities will be targeted.
-            Valid values:
-                interface
-                class
-                function
-                variable
-                enum
-                typeAlias
-                property
-                method
+            This is a comma-separated list of entity types, e.g. "module,type,function,property,variable".
     required: false
-    default: interface,class,function,enum,typeAlias,property,method
+    default: module,type,function,property
   exports_only:
     description: If true, only generate docs for exported entities.
     required: false

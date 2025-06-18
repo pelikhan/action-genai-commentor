@@ -20,7 +20,7 @@ You must set "Allow GitHub Actions to create and approve pull requests" in your 
 - `github_token`: GitHub token with `models: read` permission at least. (required)
 - `model`: The model to use for generating documentation. (default: `github:openai/gpt-4.1-mini`)
 - `files`: The files to process, in glob format. (default: `**/src/**/*.{,py}`)
-- `kinds`: Comma-separated list of kinds of entities to process: interface,class,function,enum,typeAlias,property,method,variable. (default: all but variable)
+- `kinds`: Comma-separated list of kinds of entities to process: module,type,function,property,variable. (default: all but variable)
 - `exports_only`: If true, only process exported entities. (default: `false`)
 - `update_existing`: Update existing docs (increases cost). (default: `false`)
 - `instructions`: Additional prompting instructions for the LLM.
