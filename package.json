@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A GitHub Action to generate TypeScript comments.",
   "dependencies": {
     "@ast-grep/lang-python": "^0.0.2",
