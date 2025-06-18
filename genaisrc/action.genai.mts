@@ -491,7 +491,7 @@ function getIndentedCommentText(
 function getLanguage(file: WorkspaceFile): SgLang {
   return file.filename.endsWith(".py")
     ? "python"
-    : file.filename.endsWith(".cs")
+    : file.filename.endsWith(".cs") || file.filename.endsWith(".csx")
     ? "csharp"
     : "ts";
 }
