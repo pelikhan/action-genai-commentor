@@ -4,14 +4,10 @@
   "description": "A GitHub Action to generate TypeScript comments.",
   "dependencies": {
     "@ast-grep/lang-python": "^0.0.2",
-    "genaiscript": "1.142.9"
+    "genaiscript": "1.142.14"
   },
   "scripts": {
-    "upgrade": "npx -y npm-check-updates -u && npm install",
-    "docker:build": "docker build -t pelikhan-action-genai-commentor .",
-    "docker:start": "docker run -e GITHUB_TOKEN pelikhan-action-genai-commentor",
-    "act:install": "gh extension install https://github.com/nektos/gh-act",
-    "act": "gh act",
+    "upgrade": "npx -y npm-check-updates -u && npm install && npm run fix",
     "lint": "npx --yes prettier --write genaisrc/",
     "fix": "genaiscript scripts fix",
     "typecheck": "genaiscript scripts compile",
@@ -28,6 +24,7 @@
     "mock-python-revise-docs": "DEBUG=script* genaiscript run action test/python-with-docs.py --vars dryRun=true mock=true updateExisting=true",
     "mini-python-revise-docs": "DEBUG=script* genaiscript run action test/python-with-docs.py --vars dryRun=true maxEdits=2 updateExisting=true",
     "mock": "DEBUG=script* genaiscript run action --vars dryRun=true updateExisting=true mock=true",
+    "dev": "genaiscript run action",
     "start": "DEBUG=script* genaiscript run action --github-workspace --no-run-trace --no-output-trace",
     "release": "sh release.sh"
   }

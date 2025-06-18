@@ -1,55 +1,72 @@
 name: action-genai-commentor
-description: Improve code comments using AST insertion
+description: Generate code comments using AST insertion
 inputs:
-  github_token:
-    description: "GitHub token with `models: read` permission at least."
-    required: true
   model:
-    description: The model to use for generating comments, e.g. `github:openai/gpt-4.1-mini`.
+    description: The LLM model to use for generation.
     required: false
-    default: github:openai/gpt-4.1-mini
-  kinds:
-    description: "Comma-separated list of kinds of entities to process: function.interface,class,enum,typeAlias,property,method,variable"
-    required: false
-    default: "function,interface,class,enum,typeAlias,property,method"
-  exports_only:
-    description: If true, the script will only process exported entities.
-    required: false
-    default: false
   instructions:
     description: Additional prompting instructions for the LLM.
     required: false
+  dry_run:
+    description: If true, the script will not modify files.
+    required: false
+    default: false
+  mock:
+    description: If true, the script will mock LLM results.
+    required: false
+    default: false
+  judge:
+    description: If true, the script will judge the generated docs.
+    required: false
+    default: false
   update_existing:
-    description: Update existing code comments
+    description: Update existing docs.
     required: false
     default: false
   max_edits:
     description: Maximum number of new or updated comments total.
     required: false
     default: 50
+  kinds:
+    description: >-
+      The kinds of entities to target for documentation generation.
+            This is a comma-separated list of entity types, e.g. "function,class,interface,typeAlias".
+            If not specified, all entities will be targeted.
+            Valid values:
+                interface
+                class
+                function
+                variable
+                enum
+                typeAlias
+                property
+                method
+    required: false
+    default: interface,class,function,enum,typeAlias,property,method
+  exports_only:
+    description: If true, only generate docs for exported entities.
+    required: false
+    default: false
   max_context:
     description: Maximum number of tokens to build content of requests.
     required: false
     default: 6000
-  judge:
-    description: If true, the script will judge the quality of generated comments.
-    required: false
-    default: false
-  dry_run:
-    description: If true, the script will not modify files.
-    required: false
-    default: false
-  mock:
-    description: If true, the script will insert a mock comment
-    required: false
-    default: false
-  debug:
-    description: Enable debug logging.
-    required: false
   files:
-    description: Comma-separated list of files/globs to process. If not provided, all matching files in **/src/** will be processed.
+    description: Files to process, separated by semi columns (;).
+      .ts,.mts,.tsx,.mtsx,.cts,.py
     required: false
-    default: ""
+  github_token:
+    description: "GitHub token with `models: read` permission at least
+      (https://microsoft.github.io/genaiscript/reference/github-actions/#github\
+      -models-permissions)."
+    required: true
+  debug:
+    description: Enable debug logging
+      (https://microsoft.github.io/genaiscript/reference/scripts/logging/).
+    required: false
+outputs:
+  text:
+    description: The generated text output.
 branding:
   color: yellow
   icon: filter

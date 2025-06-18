@@ -36,7 +36,7 @@ You must set "Allow GitHub Actions to create and approve pull requests" in your 
 Add the following to your step in your workflow file:
 
 ```yaml
-uses: pelikhan/action-genai-commentor@main
+uses: pelikhan/action-genai-commentor@v0
 with:
   github_token: ${{ secrets.GITHUB_TOKEN }}
   files: '**/src/**/*.{ts,tsx,mts,cts,py}'
@@ -76,7 +76,7 @@ jobs:
 
       # Improve the comments in the codebase
       - name: improve comments
-        uses: pelikhan/action-genai-commentor@main
+        uses: pelikhan/action-genai-commentor@v0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           max_edits: 100
@@ -104,14 +104,11 @@ We recommend updating the script metadata instead of editing the action files di
 - the readme description is the script description
 - the action branding is the script branding
 
-To **regenerate** the action files (`action.yml`, `Dockerfile`, `README.md`, `package.json`, `.gitignore`), run:
+To **regenerate** the action files (`action.yml`), run:
 
 ```bash
 npm run configure
 ```
-
-> [!CAUTION]
-> This will overwrite any changes you made to these files!
 
 To lint script files, run:
 
@@ -122,28 +119,6 @@ npm run lint
 To typecheck the scripts, run:
 ```bash
 npm run typecheck
-```
-
-To build the Docker image locally, run:
-```bash
-npm run docker:build
-```
-
-To run the action locally in Docker (build it first), use:
-```bash
-npm run docker:start
-```
-
-To run the action using [act](https://nektosact.com/), first install the act CLI:
-
-```bash
-npm run act:install
-```
-
-Then, you can run the action with:
-
-```bash
-npm run act
 ```
 
 ## Upgrade
