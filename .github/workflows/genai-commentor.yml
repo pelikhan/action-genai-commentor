@@ -30,8 +30,8 @@ jobs:
           restore-keys: genaiscript-
 
       # Improve the comments in the codebase
-      - name: improve comments
-        uses: ./
+      - name: genai improve comments
+        uses: pelikhan/action-genai-commentor@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           files: test/**/*.ts
