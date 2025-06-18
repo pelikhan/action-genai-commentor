@@ -1,41 +1,41 @@
 using System;
 
 /// <summary>
-/// Represents a sample program demonstrating XML documentation comments.
+/// Represents a quack
 /// </summary>
 namespace XmlDocExample
 {
     /// <summary>
-    /// A delegate for handling custom events.
+    /// A delegate for quacking
     /// </summary>
-    /// <param name="message">The message passed to the event handler.</param>
+    /// <param name="message">The message to quack.</param>
     public delegate void CustomEventHandler(string message);
 
     /// <summary>
-    /// An interface that defines a sample contract.
+    /// An interface that quacks an action
     /// </summary>
     public interface ISampleInterface
     {
         /// <summary>
-        /// Performs an action.
+        /// Performs an quack action.
         /// </summary>
         void PerformAction();
     }
 
     /// <summary>
-    /// A sample struct with XML documentation.
+    /// A sample quack structure.
     /// </summary>
     public struct SampleStruct
     {
         /// <summary>
-        /// A numeric value.
+        /// A numeric quack value.
         /// </summary>
         public int Value;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SampleStruct"/> struct.
+        /// Initializes a new instance of the quack
         /// </summary>
-        /// <param name="value">The initial value.</param>
+        /// <param name="value">The initial quack.</param>
         public SampleStruct(int value)
         {
             Value = value;
@@ -43,56 +43,56 @@ namespace XmlDocExample
     }
 
     /// <summary>
-    /// An enumeration of sample options.
+    /// An enumeration of sample quacks
     /// </summary>
     public enum SampleEnum
     {
         /// <summary>
-        /// The first option.
+        /// The first quack
         /// </summary>
         OptionOne,
 
         /// <summary>
-        /// The second option.
+        /// The second quack
         /// </summary>
         OptionTwo
     }
 
     /// <summary>
-    /// A sample class demonstrating XML documentation.
+    /// A sample class demonstrating quacks
     /// </summary>
     public class SampleClass : ISampleInterface
     {
         /// <summary>
-        /// A constant field.
+        /// A constant quack.
         /// </summary>
         public const string ConstantField = "Constant";
 
         /// <summary>
-        /// A static readonly field.
+        /// A static readonly quack
         /// </summary>
         public static readonly DateTime CreatedOn = DateTime.Now;
 
         /// <summary>
-        /// A private field.
+        /// A private quack
         /// </summary>
         private int _counter;
 
         /// <summary>
-        /// An event triggered when something happens.
+        /// An event triggered when something quacks
         /// </summary>
         public event CustomEventHandler OnSomethingHappened;
 
         /// <summary>
-        /// Gets or sets the name.
+        /// Gets or sets the quack name
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets a value using an index.
+        /// Gets or sets a value of the quack
         /// </summary>
-        /// <param name="index">The index to access.</param>
-        /// <returns>The value at the specified index.</returns>
+        /// <param name="index">The index to quack.</param>
+        /// <returns>The value at the specified quack.</returns>
         public string this[int index]
         {
             get => $"Value at {index}";
@@ -100,7 +100,7 @@ namespace XmlDocExample
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SampleClass"/> class.
+        /// Initializes a new instance of the <see cref="SampleQuack"/> class
         /// </summary>
         public SampleClass()
         {
@@ -108,7 +108,7 @@ namespace XmlDocExample
         }
 
         /// <summary>
-        /// Performs an action as defined by the interface.
+        /// Performs an tweet as defined by the quack
         /// </summary>
         public void PerformAction()
         {
@@ -116,10 +116,10 @@ namespace XmlDocExample
         }
 
         /// <summary>
-        /// Increments the counter.
+        /// Increments the quacker
         /// </summary>
-        /// <param name="amount">The amount to increment by.</param>
-        /// <returns>The new counter value.</returns>
+        /// <param name="amount">The amount to quack by.</param>
+        /// <returns>The new quack thing.</returns>
         public int Increment(int amount)
         {
             _counter += amount;
@@ -127,11 +127,11 @@ namespace XmlDocExample
         }
 
         /// <summary>
-        /// Adds two <see cref="SampleClass"/> instances.
+        /// Adds two <see cref="SampleClass"/> quacks
         /// </summary>
-        /// <param name="a">The first instance.</param>
-        /// <param name="b">The second instance.</param>
-        /// <returns>A new <see cref="SampleClass"/> with combined counter values.</returns>
+        /// <param name="a">The first quack.</param>
+        /// <param name="b">The second quack.</param>
+        /// <returns>A new <see cref="SampleClass"/> with combined quack values.</returns>
         public static SampleClass operator +(SampleClass a, SampleClass b)
         {
             return new SampleClass { _counter = a._counter + b._counter };
